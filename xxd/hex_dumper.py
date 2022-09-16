@@ -1,3 +1,4 @@
+import os.path
 import sys
 
 from xxd import version_string, os_version
@@ -93,4 +94,7 @@ class HexDumper:
         self.version: bool = args.get("version", False)
 
         self.infile: str = args.get("infile", None)
+        if self.infile and not self.infile == '-':
+            if not os.path.exists(self.infile):
+                raise RuntimeError(f"{self.pname}: {self.infile}: No such file or directory")
         self.outfile: str = args.get("outfile", None)
