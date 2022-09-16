@@ -4,10 +4,16 @@ from xxd import HexType
 
 
 class HexDumper:
-    """Hex dumper"""
+    """Python version of Juergen Weigert's xxd"""
 
     version_string = "xxd 2022-09-16 by Juergen Weigert et al."
     os_version = " (win32)" if sys.platform[0:3] == "win" else ""
+
+    def run(self):
+        """Runs the hex dump"""
+        if self.version:
+            sys.stderr.write(f"{self.version_string}{self.os_version}" + "\n")
+            exit(0)
 
     def __init__(self, args: dict):
         """Creates a new XXD object with specified options.
@@ -83,9 +89,3 @@ class HexDumper:
 
         self.infile: str = args.get("infile", None)
         self.outfile: str = args.get("outfile", None)
-
-    def run(self):
-        """Runs the hex dump"""
-        if self.version:
-            sys.stderr.write(f"{self.version_string}{self.os_version}" + "\n")
-            exit(0)
