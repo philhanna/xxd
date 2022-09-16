@@ -93,6 +93,12 @@ class TestXXDOptions(TestCase):
         actual = xxd.octets_per_group
         self.assertEqual(expected, actual)
 
+    def test_g_b(self):
+        xxd = HexDumper({"binary": True})
+        expected = 1
+        actual = xxd.octets_per_group
+        self.assertEqual(expected, actual)
+
     def test_include_default(self):
         xxd = HexDumper({})
         self.assertFalse(xxd.include)

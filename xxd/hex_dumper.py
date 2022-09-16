@@ -55,6 +55,8 @@ class HexDumper:
         # Octets per group option has different defaults depending on other -e has been specified
         if "little_endian" in args:
             self.octets_per_group = 4
+        elif "binary" in args:
+            self.octets_per_group = 1
         else:
             self.octets_per_group = 2
 
