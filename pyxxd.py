@@ -5,8 +5,6 @@ from xxd import HexDumper
 if __name__ == '__main__':
     import argparse
 
-    version = "xxd 2022-01-14 by Juergen Weigert et al."
-
     parser = argparse.ArgumentParser(description="xxd")
     parser.add_argument("-a", "--autoskip", action="store_true",
                         help="toggle autoskip. A single '*' replaces nul-lines. Default off.")
@@ -41,7 +39,7 @@ if __name__ == '__main__':
     parser.add_argument("-u", "--uppercase", action="store_true",
                         help="use upper case hex letters.")
     parser.add_argument("-v", "--version", action="store_true",
-                        help=f"show version: \"{version}\".")
+                        help=f"show version: \"{HexDumper.version_string}\".")
     parser.add_argument("infile", nargs="?", help="input file name. Default \"-\" for stdin.")
     parser.add_argument("outfile", nargs="?", help="output file name. Default is stdout.")
     args = parser.parse_args()

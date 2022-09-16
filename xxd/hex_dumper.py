@@ -6,11 +6,15 @@ from xxd import HexType
 class HexDumper:
     """Hex dumper"""
 
+    version_string = "xxd 2022-09-16 by Juergen Weigert et al."
+    os_version = " (win32)" if sys.platform[0:3] == "win" else ""
+
     def __init__(self, args: dict):
         """Creates a new XXD object with specified options.
         Note that defaults are implemented here by the dictionary 'get(key, default)' approach.
         Incompatible options raise a ValueError.
         """
+
         self.pname: str = sys.argv[0].split("/")[-1]
         self.autoskip: bool = args.get("autoskip", False)
 
@@ -82,3 +86,6 @@ class HexDumper:
 
     def run(self):
         """Runs the hex dump"""
+        if self.version:
+            sys.stderr.write(f"{self.version_string}{self.os_version}" + "\n")
+            exit(0)
