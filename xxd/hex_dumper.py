@@ -7,16 +7,74 @@ from xxd import version_string, os_version
 class HexDumper:
     """Python version of Juergen Weigert's xxd"""
 
-    def run(self, infile=None):
-        """Runs the hex dump"""
+    def mainline(self):
+        """Runs the hex dumper"""
+        offset = 0
+        while True:
+            offset += 16
+            data = self.fpin.read(16)
+            if len(data) == 0:
+                break
+            if type(data) == str:
+                data = bytes(data.encode("utf-8"))
+            data_list = [data[i:i+2] for i in range(0, len(data), 2)]
+            hex_list = []
+            text_list = []
+            for chunk in data_list:
+                sb = ""
+                sb += format(chunk[0], "02x")
+                if len(chunk) > 1:
+                    sb += format(chunk[1], "02x")
+                hex_list.append(sb)
+
+                sb = ""
+                sb += self.text_format(chunk[0])
+                if len(chunk) > 1:
+                    sb += self.text_format(chunk[1])
+                text_list.append(sb)
+            data = " ".join(hex_list)
+            text = "".join(text_list)
+            print(f"{offset:08x}: {data:40s} {text}")
+
+    @staticmethod
+    def text_format(c: int):
+        if c < 128 and chr(c).isprintable():
+            return chr(c)
+        else:
+            return "."
+
+    def run(self):
+        """Calls mainline with specified input and output files"""
 
         # Check for infile.  If not specified, or if it is "-", use stdin.
-        # Otherwise, try to open the file
-        if infile is None:
-            self.run(infile=sys.stdin)
-        elif infile is not sys.stdin:
-            with open(infile, "rb") as fp:
-                self.run(infile=fp)
+        # Otherwise, try to open the file.
+        # If outfile is specified, open it for writing, otherwise, use stdout.
+
+        self.fpin = None
+        self.fpout = None
+        try:
+            if self.infile is None or self.infile == sys.stdin or self.infile == '-':
+                self.fpin = sys.stdin
+            else:
+                self.fpin = open(self.infile, "rb")
+
+            if self.outfile is None or self.outfile == sys.stdout:
+                self.fpout = sys.stdout
+            else:
+                self.fpout = open(self.outfile, "wb")
+
+            # Run the mainline
+            self.mainline()
+
+        # Close the files
+        finally:
+            if self.fpin is not None:
+                if self.fpin != sys.stdin:
+                    self.fpin.close()
+            if self.fpout is not None:
+                self.fpout.flush()
+                if self.fpout != sys.stdout:
+                    self.fpout.close()
 
     def __init__(self, args: dict = {}):
         """Creates a new XXD object with specified options.
@@ -25,6 +83,8 @@ class HexDumper:
         """
 
         self.pname: str = sys.argv[0].split("/")[-1]
+        self.fpin = None
+        self.fpout = None
         self.autoskip: bool = args.get("autoskip", False)
 
         # Binary option is incompatible with -ps, -i, or -r
