@@ -1,18 +1,15 @@
 import sys
 
-from xxd import HexType
+from xxd import version_string, os_version
 
 
 class HexDumper:
     """Python version of Juergen Weigert's xxd"""
 
-    version_string = "xxd 2022-09-16 by Juergen Weigert et al."
-    os_version = " (win32)" if sys.platform[0:3] == "win" else ""
-
     def run(self):
         """Runs the hex dump"""
         if self.version:
-            sys.stderr.write(f"{self.version_string}{self.os_version}" + "\n")
+            sys.stderr.write(f"{version_string}{os_version}" + "\n")
             exit(0)
 
     def __init__(self, args: dict):
