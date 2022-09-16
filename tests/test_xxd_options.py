@@ -113,3 +113,26 @@ class TestXXDOptions(TestCase):
         expected = None
         actual = xxd.name
         self.assertEqual(expected, actual)
+
+    def test_offset(self):
+        xxd = HexDumper({"offset": 0x100})
+        expected = 256
+        actual = xxd.offset
+        self.assertEqual(expected, actual)
+
+    def test_offset_bogus(self):
+        with self.assertRaises(ValueError) as err:
+            HexDumper({"offset": "bogus"})
+        errmsg = str(err.exception)
+
+    def test_offset_default(self):
+        xxd = HexDumper({})
+        self.assertIsNone(xxd.length)
+
+    def test_postscript(self):
+        xxd = HexDumper({"postscript": True})
+        self.assertTrue(xxd.postscript)
+
+    def test_reverse(self):
+        xxd = HexDumper({"reverse": True})
+        self.assertTrue(xxd.reverse)

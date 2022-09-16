@@ -53,9 +53,22 @@ class HexDumper:
             if str(length).isdigit():
                 length = int(length)
                 if length < 0:
-                    raise ValueError(f"{length} is not a non-negative integer")
+                    raise ValueError(f"{length=} is not a non-negative integer")
             else:
-                raise ValueError(f"{length} is not numeric")
+                raise ValueError(f"{length=} is not numeric")
         self.length: int = length
 
         self.name: str = args.get("name", None)
+
+        offset = args.get("offset", 0)
+        if offset is not None:
+            if str(offset).isdigit():
+                offset = int(offset)
+                if offset < 0:
+                    raise ValueError(f"{offset=} is not a non-negative integer")
+            else:
+                raise ValueError(f"{offset=} is not numeric")
+        self.offset: int = offset
+
+        self.postscript: bool = args.get("postscript", False)
+        self.reverse: bool = args.get("reverse", False)
