@@ -41,7 +41,7 @@ class HexDumper:
                     raise ValueError("-e option is incompatible with -ps, -i, or -r.")
 
         # Octets per group option has different defaults depending on other -e has been specified
-        if "EBCDIC" in args:
+        if "little_endian" in args:
             self.octets_per_group = 4
         else:
             self.octets_per_group = 2

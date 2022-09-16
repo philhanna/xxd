@@ -75,8 +75,8 @@ class TestXXDOptions(TestCase):
         actual = xxd.octets_per_group
         self.assertEqual(expected, actual)
 
-    def test_g_EBCDIC(self):
-        xxd = HexDumper({"EBCDIC": True})
+    def test_g_e(self):
+        xxd = HexDumper({"little_endian": True})
         expected = 4
         actual = xxd.octets_per_group
         self.assertEqual(expected, actual)
