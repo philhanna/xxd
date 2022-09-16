@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-from xxd import XXD
+from xxd import HexDumper
 
 if __name__ == '__main__':
     import argparse
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     parser.add_argument("-c", "--cols",
                         help="format <cols> octets per line. Default 16 (-i: 12, -ps: 30).")
     parser.add_argument("-E", "--EBCDIC", action="store_true",
-                        help="show characters in EBCDIC. Default ASCII.")
+                        help="show characters in EBCDIC. Default false (ASCII).")
     parser.add_argument("-e", "--little-endian", action="store_true",
                         help="little-endian dump (incompatible with -ps,-i,-r).")
     parser.add_argument("-g", "--octets-per-group",
@@ -48,5 +48,5 @@ if __name__ == '__main__':
     for argkey, argvalue in vars(args).items():
         print(f"DEBUG: {argkey} = {argvalue}")
     exit()
-    xxd = XXD(args)
+    xxd = HexDumper(args)
     xxd.run()

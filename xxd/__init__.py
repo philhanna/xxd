@@ -1,7 +1,7 @@
 from .hex_type import HexType
-from .hex_dumper import XXD
+from .hex_dumper import HexDumper
 
 __all__ = [
     'HexType',
-    'XXD',
+    'HexDumper',
 ]
