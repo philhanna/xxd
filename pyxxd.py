@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-from xxd import HexDumper
+from xxd import HexDumper, version_string
 
 if __name__ == '__main__':
     import argparse
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     parser.add_argument("-u", "--uppercase", action="store_true",
                         help="use upper case hex letters.")
     parser.add_argument("-v", "--version", action="store_true",
-                        help=f"show version: \"{HexDumper.version_string}\".")
+                        help=f"show version: \"{version_string}\".")
     parser.add_argument("infile", nargs="?", help="input file name. Default \"-\" for stdin.")
     parser.add_argument("outfile", nargs="?", help="output file name. Default is stdout.")
     args = parser.parse_args()

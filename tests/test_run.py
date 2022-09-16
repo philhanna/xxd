@@ -1,4 +1,5 @@
 from unittest import TestCase
+from unittest.mock import MagicMock
 
 from xxd import HexDumper
 
@@ -6,4 +7,8 @@ from xxd import HexDumper
 class TestRun(TestCase):
 
     def test_run_with_version(self):
-        xxd = HexDumper()
+        with self.assertRaises(SystemExit) as err:
+            xxd = HexDumper({"version": True})
+            xxd.run()
+        errmsg = str(err.exception)
+        self.assertEqual("0", errmsg)
