@@ -47,3 +47,12 @@ class HexDumper:
             self.octets_per_group = 2
 
         self.include: bool = args.get("include", False)
+        length = args.get("len", None)
+        if length is not None:
+            if str(length).isdigit():
+                length = int(length)
+                if length < 0:
+                    raise ValueError(f"{length} is not a non-negative integer")
+            else:
+                raise ValueError(f"{length} is not numeric")
+        self.length: int = length

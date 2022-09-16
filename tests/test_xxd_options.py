@@ -86,3 +86,18 @@ class TestXXDOptions(TestCase):
     def test_include_default(self):
         xxd = HexDumper({})
         self.assertFalse(xxd.include)
+
+    def test_len(self):
+        xxd = HexDumper({"len": 13})
+        expected = 13
+        actual = xxd.length
+        self.assertEqual(expected, actual)
+
+    def test_len_bogus(self):
+        with self.assertRaises(ValueError) as err:
+            HexDumper({"len": "bogus"})
+        errmsg = str(err.exception)
+
+    def test_len_default(self):
+        xxd = HexDumper({})
+        self.assertIsNone(xxd.length)
