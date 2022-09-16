@@ -7,11 +7,13 @@ from xxd import version_string, os_version
 class HexDumper:
     """Python version of Juergen Weigert's xxd"""
 
-    def run(self):
+    def run(self, infile=None):
         """Runs the hex dump"""
-        if self.version:
-            sys.stderr.write(f"{version_string}{os_version}" + "\n")
-            exit(0)
+        if infile is None:
+            self.run(infile=sys.stdin)
+        elif infile is not sys.stdin:
+            with open(infile, "rb") as fp:
+                self.run(infile=fp)
 
     def __init__(self, args: dict = {}):
         """Creates a new XXD object with specified options.

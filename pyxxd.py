@@ -1,7 +1,7 @@
 #! /usr/bin/python
 import sys
 
-from xxd import HexDumper, version_string
+from xxd import HexDumper, version_string, os_version
 
 if __name__ == '__main__':
     import argparse
@@ -43,10 +43,13 @@ if __name__ == '__main__':
                         help=f"show version: \"{version_string}\".")
     parser.add_argument("infile", nargs="?", help="input file name. Default \"-\" for stdin.")
     parser.add_argument("outfile", nargs="?", help="output file name. Default is stdout.")
-    args = parser.parse_args()
+    args = vars(parser.parse_args())
+    if args["version"]:
+        sys.stderr.write(f"{version_string}{os_version}" + "\n")
+        sys.exit(0)
 
     try:
-        xxd = HexDumper(vars(args))
+        xxd = HexDumper(args)
         xxd.run()
     except Exception as err:
         print(err, file=sys.stderr)
