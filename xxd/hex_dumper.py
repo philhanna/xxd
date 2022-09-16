@@ -38,6 +38,8 @@ class HexDumper:
             self.cols = 30
         elif "include" in args:
             self.cols = 12
+        elif "binary" in args:
+            self.cols = 6
         else:
             self.cols = 16
 

@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser.add_argument("-C", "--capitalize", action="store_true",
                         help="capitalize variable names in C include file style (-i).")
     parser.add_argument("-c", "--cols",
-                        help="format <cols> octets per line. Default 16 (-i: 12, -ps: 30).")
+                        help="format <cols> octets per line. Default 16 (-i: 12, -ps: 30, -b: 6).")
     parser.add_argument("-E", "--EBCDIC", action="store_true",
                         help="show characters in EBCDIC. Default false (ASCII).")
     parser.add_argument("-e", "--little-endian", action="store_true",

@@ -51,6 +51,12 @@ class TestXXDOptions(TestCase):
         actual = xxd.cols
         self.assertEqual(expected, actual)
 
+    def test_cols_binary(self):
+        xxd = HexDumper({"binary": True})
+        expected = 6
+        actual = xxd.cols
+        self.assertEqual(expected, actual)
+
     def test_EBCDIC(self):
         xxd = HexDumper({})
         self.assertFalse(xxd.EBCDIC)
