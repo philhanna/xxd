@@ -45,8 +45,5 @@ if __name__ == '__main__':
     parser.add_argument("infile", nargs="?", help="input file name. Default \"-\" for stdin.")
     parser.add_argument("outfile", nargs="?", help="output file name. Default is stdout.")
     args = parser.parse_args()
-    for argkey, argvalue in vars(args).items():
-        print(f"DEBUG: {argkey} = {argvalue}")
-    exit()
     xxd = HexDumper(vars(args))
     xxd.run()

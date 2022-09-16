@@ -79,3 +79,7 @@ class HexDumper:
 
         self.infile: str = args.get("infile", None)
         self.outfile: str = args.get("outfile", None)
+
+    def run(self):
+        """Runs the hex dump"""
+        ...
