@@ -160,3 +160,24 @@ class TestXXDOptions(TestCase):
     def test_version(self):
         xxd = HexDumper({"version": True})
         self.assertTrue(xxd.version)
+
+    def test_infile(self):
+        xxd = HexDumper({"infile": "/usr/bin/cut"})
+        expected = "/usr/bin/cut"
+        actual = xxd.infile
+        self.assertEqual(expected, actual)
+
+    def test_infile_stdin(self):
+        xxd = HexDumper({"infile": "-"})
+        expected = "-"
+        actual = xxd.infile
+        self.assertEqual(expected, actual)
+
+    def test_infile_default(self):
+        xxd = HexDumper({})
+        self.assertIsNone(xxd.infile)
+
+    def test_outfile(self):
+        xxd = HexDumper({})
+        self.assertIsNone(xxd.outfile)
+
