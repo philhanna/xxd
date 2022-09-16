@@ -156,3 +156,7 @@ class TestXXDOptions(TestCase):
     def test_uppercase(self):
         xxd = HexDumper({"uppercase": True})
         self.assertTrue(xxd.uppercase)
+
+    def test_version(self):
+        xxd = HexDumper({"version": True})
+        self.assertTrue(xxd.version)

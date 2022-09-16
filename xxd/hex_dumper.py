@@ -75,3 +75,5 @@ class HexDumper:
         self.decimal: bool = args.get("decimal", False)
         self.seek: int = args.get("seek", 0)
         self.uppercase: bool = args.get("uppercase", False)
+
+        self.version: bool = args.get("version", False)
