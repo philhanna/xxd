@@ -9,6 +9,9 @@ class HexDumper:
 
     def run(self, infile=None):
         """Runs the hex dump"""
+
+        # Check for infile.  If not specified, or if it is "-", use stdin.
+        # Otherwise, try to open the file
         if infile is None:
             self.run(infile=sys.stdin)
         elif infile is not sys.stdin:
