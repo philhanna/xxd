@@ -48,5 +48,5 @@ if __name__ == '__main__':
     for argkey, argvalue in vars(args).items():
         print(f"DEBUG: {argkey} = {argvalue}")
     exit()
-    xxd = HexDumper(args)
+    xxd = HexDumper(vars(args))
     xxd.run()
