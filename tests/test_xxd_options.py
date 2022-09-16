@@ -136,3 +136,19 @@ class TestXXDOptions(TestCase):
     def test_reverse(self):
         xxd = HexDumper({"reverse": True})
         self.assertTrue(xxd.reverse)
+
+    def test_decimal(self):
+        xxd = HexDumper({"decimal": True})
+        self.assertTrue(xxd.decimal)
+
+    def test_seek(self):
+        xxd = HexDumper({"seek": 0x0100})
+        expected = 256
+        actual = xxd.seek
+        self.assertEqual(expected, actual)
+
+    def test_seek_default(self):
+        xxd = HexDumper({})
+        expected = 0
+        actual = xxd.seek
+        self.assertEqual(expected, actual)

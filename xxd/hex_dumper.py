@@ -72,3 +72,5 @@ class HexDumper:
 
         self.postscript: bool = args.get("postscript", False)
         self.reverse: bool = args.get("reverse", False)
+        self.decimal: bool = args.get("decimal", False)
+        self.seek: int = args.get("seek", 0)
