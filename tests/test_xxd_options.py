@@ -5,6 +5,10 @@ from xxd import HexDumper
 
 class TestXXDOptions(TestCase):
 
+    def test_autoskip_default(self):
+        xxd = HexDumper({})
+        self.assertFalse(xxd.autoskip)
+
     # The -b option is incompatible with -ps, -i, or -r
     def test_binary_conflict_postscript(self):
         with self.assertRaises(ValueError) as err:
@@ -45,9 +49,7 @@ class TestXXDOptions(TestCase):
 
     def test_EBCDIC(self):
         xxd = HexDumper({})
-        expected = False
-        actual = xxd.EBCDIC
-        self.assertEqual(expected, actual)
+        self.assertFalse(xxd.EBCDIC)
 
     # The -e option is incompatible with -ps, -i, or -r
     def test_e_conflict_postscript(self):
@@ -80,3 +82,7 @@ class TestXXDOptions(TestCase):
         expected = 4
         actual = xxd.octets_per_group
         self.assertEqual(expected, actual)
+
+    def test_include_default(self):
+        xxd = HexDumper({})
+        self.assertFalse(xxd.include)

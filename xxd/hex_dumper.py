@@ -46,6 +46,4 @@ class HexDumper:
         else:
             self.octets_per_group = 2
 
-    def run(self):
-        """Runs the hex dumper"""
-        pass
+        self.include: bool = args.get("include", False)
