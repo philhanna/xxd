@@ -1,5 +1,5 @@
 from .hex_type import HexType
-from .xxd import XXD
+from .hex_dumper import XXD
 
 __all__ = [
     'HexType',
