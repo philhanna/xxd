@@ -101,3 +101,15 @@ class TestXXDOptions(TestCase):
     def test_len_default(self):
         xxd = HexDumper({})
         self.assertIsNone(xxd.length)
+
+    def test_name(self):
+        xxd = HexDumper({"name": "wonderful"})
+        expected = "wonderful"
+        actual = xxd.name
+        self.assertEqual(expected, actual)
+
+    def test_name_default(self):
+        xxd = HexDumper({})
+        expected = None
+        actual = xxd.name
+        self.assertEqual(expected, actual)
