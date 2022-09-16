@@ -12,7 +12,7 @@ class HexDumper:
             sys.stderr.write(f"{version_string}{os_version}" + "\n")
             exit(0)
 
-    def __init__(self, args: dict):
+    def __init__(self, args: dict = {}):
         """Creates a new XXD object with specified options.
         Note that defaults are implemented here by the dictionary 'get(key, default)' approach.
         Incompatible options raise a ValueError.
