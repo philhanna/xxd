@@ -5,6 +5,10 @@ from xxd import HexDumper
 
 class TestXXDOptions(TestCase):
 
+    def test_pname(self):
+        xxd = HexDumper({})
+        self.assertIsNotNone(xxd.pname)
+
     def test_autoskip_default(self):
         xxd = HexDumper({})
         self.assertFalse(xxd.autoskip)

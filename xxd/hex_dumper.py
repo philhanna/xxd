@@ -82,4 +82,3 @@ class HexDumper:
 
     def run(self):
         """Runs the hex dump"""
-        ...
