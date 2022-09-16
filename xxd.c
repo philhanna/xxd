@@ -487,7 +487,7 @@ int main(int argc, char *argv[]) {
         }
         else if (!STRNCMP(pp, "-n", 2)) {
             if (pp[2] && STRNCMP("ame", pp + 2, 3))
-            varname = pp + 2;
+                varname = pp + 2;
             else {
                 if (!argv[2])
                     exit_with_usage();
