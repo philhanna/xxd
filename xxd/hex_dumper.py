@@ -68,7 +68,7 @@ class HexDumper:
 
         length = args.get("len", None)
         if length is not None:
-            if str(length).isdigit():
+            if str(length).isdigit() or str(length)[1:].isdigit():
                 length = int(length)
                 if length < 0:
                     raise ValueError(f"{length=} is not a non-negative integer")
@@ -80,7 +80,7 @@ class HexDumper:
 
         offset = args.get("offset", 0)
         if offset is not None:
-            if str(offset).isdigit():
+            if str(offset).isdigit() or str(offset)[1:].isdigit():
                 offset = int(offset)
                 if offset < 0:
                     raise ValueError(f"{offset=} is not a non-negative integer")

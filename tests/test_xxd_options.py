@@ -115,10 +115,23 @@ class TestXXDOptions(TestCase):
         actual = xxd.length
         self.assertEqual(expected, actual)
 
+    def test_len_zero(self):
+        xxd = HexDumper({"len": 0})
+        expected = 0
+        actual = xxd.length
+        self.assertEqual(expected, actual)
+
+    def test_len_negative(self):
+        with self.assertRaises(ValueError) as err:
+            HexDumper({"len": "-1"})
+        errmsg = str(err.exception)
+        self.assertIn("negative", errmsg)
+
     def test_len_bogus(self):
         with self.assertRaises(ValueError) as err:
             HexDumper({"len": "bogus"})
         errmsg = str(err.exception)
+        self.assertIn("numeric", errmsg)
 
     def test_len_default(self):
         xxd = HexDumper({})
@@ -142,10 +155,17 @@ class TestXXDOptions(TestCase):
         actual = xxd.offset
         self.assertEqual(expected, actual)
 
+    def test_offset_negative(self):
+        with self.assertRaises(ValueError) as err:
+            HexDumper({"offset": -86})
+        errmsg = str(err.exception)
+        self.assertIn("negative", errmsg)
+
     def test_offset_bogus(self):
         with self.assertRaises(ValueError) as err:
             HexDumper({"offset": "bogus"})
         errmsg = str(err.exception)
+        self.assertIn("numeric", errmsg)
 
     def test_offset_default(self):
         xxd = HexDumper({})
