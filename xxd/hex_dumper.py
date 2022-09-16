@@ -57,6 +57,10 @@ class HexDumper:
             self.octets_per_group = 4
         elif "binary" in args:
             self.octets_per_group = 1
+        elif "postscript" in args:
+            self.octets_per_group = 0
+        elif "include" in args:
+            self.octets_per_group = 0
         else:
             self.octets_per_group = 2
 
