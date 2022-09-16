@@ -152,3 +152,7 @@ class TestXXDOptions(TestCase):
         expected = 0
         actual = xxd.seek
         self.assertEqual(expected, actual)
+
+    def test_uppercase(self):
+        xxd = HexDumper({"uppercase": True})
+        self.assertTrue(xxd.uppercase)

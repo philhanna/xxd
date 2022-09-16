@@ -74,3 +74,4 @@ class HexDumper:
         self.reverse: bool = args.get("reverse", False)
         self.decimal: bool = args.get("decimal", False)
         self.seek: int = args.get("seek", 0)
+        self.uppercase: bool = args.get("uppercase", False)
