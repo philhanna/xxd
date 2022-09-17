@@ -11,7 +11,6 @@ class HexDumper:
         """Runs the hex dumper"""
         offset = 0
         while True:
-            offset += 16
             data = self.fpin.read(16)
             if len(data) == 0:
                 break
@@ -35,6 +34,7 @@ class HexDumper:
             data = " ".join(hex_list)
             text = "".join(text_list)
             print(f"{offset:08x}: {data:40s} {text}")
+            offset += 16
 
     @staticmethod
     def text_format(c: int):
