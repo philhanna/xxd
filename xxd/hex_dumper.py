@@ -8,13 +8,18 @@ class HexDumper:
     def mainline(self):
         """Runs the hex dumper"""
         offset = 0
+        so_far = 0
         while True:
-            data = self.fpin.read(16)
+            chunk_size = 16
+            if hasattr(self, "length"):
+                if so_far + chunk_size > self.length:
+                    chunk_size = self.length % chunk_size
+            data = self.fpin.read(chunk_size)
             if len(data) == 0:
                 break
             if type(data) == str:
                 data = bytes(data.encode("utf-8"))
-            data_list = [data[i:i+2] for i in range(0, len(data), 2)]
+            data_list = [data[i:i + 2] for i in range(0, len(data), 2)]
             hex_list = []
             text_list = []
             for chunk in data_list:
@@ -29,15 +34,20 @@ class HexDumper:
                 if len(chunk) > 1:
                     sb += self.text_format(chunk[1])
                 text_list.append(sb)
-            data = " ".join(hex_list)
+            sdata = " ".join(hex_list)
             text = "".join(text_list)
-            line = f"{offset:08x}: {data:40s} {text}\n"
+            line = f"{offset:08x}: {sdata:40s} {text}\n"
             bline = line.encode('utf-8')
             try:
                 self.fpout.write(bline)
             except TypeError as e:
                 self.fpout.write(line)
-            offset += 16
+            offset += chunk_size
+            so_far += len(data)
+            if hasattr(self, "length"):
+                length = self.length
+                if so_far >= length:
+                    break
 
     @staticmethod
     def text_format(c: int):
