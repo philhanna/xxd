@@ -134,13 +134,13 @@ class HexDumper:
 
         length = args.get("len", None)
         if length is not None:
-            if str(length).isdigit() or str(length)[1:].isdigit():
-                length = int(length)
-                if length < 0:
-                    raise ValueError(f"{length=} is not a non-negative integer")
-            else:
-                raise ValueError(f"{length=} is not numeric")
-        self.length: int = length
+            try:
+                self.length: int = int(length, 0)
+            except ValueError as e:
+                errmsg = f"-l {length} is not numeric"
+                raise ValueError(errmsg)
+            if self.length < 0:
+                raise ValueError(f"{length} is not a non-negative integer")
 
         self.name: str = args.get("name", None)
 
