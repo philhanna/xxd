@@ -110,13 +110,13 @@ class TestXXDOptions(TestCase):
         self.assertFalse(xxd.include)
 
     def test_len(self):
-        xxd = HexDumper({"len": 13})
+        xxd = HexDumper({"len": "13"})
         expected = 13
         actual = xxd.length
         self.assertEqual(expected, actual)
 
     def test_len_zero(self):
-        xxd = HexDumper({"len": 0})
+        xxd = HexDumper({"len": "0"})
         expected = 0
         actual = xxd.length
         self.assertEqual(expected, actual)
@@ -131,11 +131,11 @@ class TestXXDOptions(TestCase):
         with self.assertRaises(ValueError) as err:
             HexDumper({"len": "bogus"})
         errmsg = str(err.exception)
-        self.assertIn("numeric", errmsg)
+        self.assertIn("not numeric", errmsg)
 
     def test_len_default(self):
         xxd = HexDumper({})
-        self.assertIsNone(xxd.length)
+        self.assertFalse(hasattr(xxd, "length"))
 
     def test_name(self):
         xxd = HexDumper({"name": "wonderful"})
@@ -169,7 +169,9 @@ class TestXXDOptions(TestCase):
 
     def test_offset_default(self):
         xxd = HexDumper({})
-        self.assertIsNone(xxd.length)
+        expected = 0
+        actual = xxd.offset
+        self.assertEqual(expected, actual)
 
     def test_postscript(self):
         xxd = HexDumper({"postscript": True})
