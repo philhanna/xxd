@@ -1,8 +1,6 @@
 import os.path
 import sys
 
-from xxd import version_string, os_version
-
 
 class HexDumper:
     """Python version of Juergen Weigert's xxd"""
@@ -33,7 +31,12 @@ class HexDumper:
                 text_list.append(sb)
             data = " ".join(hex_list)
             text = "".join(text_list)
-            print(f"{offset:08x}: {data:40s} {text}")
+            line = f"{offset:08x}: {data:40s} {text}\n"
+            bline = line.encode('utf-8')
+            try:
+                self.fpout.write(bline)
+            except TypeError as e:
+                self.fpout.write(line)
             offset += 16
 
     @staticmethod

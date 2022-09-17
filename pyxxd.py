@@ -48,8 +48,6 @@ if __name__ == '__main__':
         sys.stderr.write(f"{version_string}{os_version}" + "\n")
         sys.exit(0)
 
-    try:
-        xxd = HexDumper(args)
-        xxd.run()
-    except Exception as err:
-        print(err, file=sys.stderr)
+    xxd = HexDumper(args)
+    xxd.run()
+
