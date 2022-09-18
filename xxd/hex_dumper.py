@@ -1,5 +1,7 @@
 import os.path
+import pdb
 import sys
+from io import UnsupportedOperation
 
 
 class HexDumper:
@@ -9,6 +11,18 @@ class HexDumper:
         """Runs the hex dumper"""
         offset = 0
         so_far = 0
+        if hasattr(self, "seek"):
+            if self.seek is not None:
+                seek = self.seek
+                if type(seek) != int:
+                    seek = int(seek, 0)
+                try:
+                    self.fpin.seek(seek)
+                except UnsupportedOperation as e:
+                    for i in range(seek):
+                        self.fpin.read(1)
+                offset += seek
+
         while True:
             chunk_size = 16
             if hasattr(self, "length"):
@@ -167,7 +181,7 @@ class HexDumper:
         self.postscript: bool = args.get("postscript", False)
         self.reverse: bool = args.get("reverse", False)
         self.decimal: bool = args.get("decimal", False)
-        self.seek: int = args.get("seek", 0)
+        self.seek = args.get("seek", 0)
         self.uppercase: bool = args.get("uppercase", False)
         self.version: bool = args.get("version", False)
 
