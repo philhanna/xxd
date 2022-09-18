@@ -93,3 +93,65 @@ class TestRun(TestCase):
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
         os.remove(file2)
+
+    def test_run_columns_default(self):
+        file1 = os.path.join(tempfile.gettempdir(), "file1")
+        parms = ["xxd", "testdata/short", file1]
+        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
+        if cp.returncode != 0:
+            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+
+        file2 = os.path.join(tempfile.gettempdir(), "file2")
+        args = {
+            "infile": os.path.join(project_root_dir, "testdata/short"),
+            "outfile": file2
+        }
+        app = HexDumper(args)
+        app.run()
+
+        self.assertTrue(filecmp.cmp(file1, file2))
+        os.remove(file1)
+        os.remove(file2)
+
+    def test_run_columns_10(self):
+        file1 = os.path.join(tempfile.gettempdir(), "file1")
+        parms = ["xxd", "-u", "-d", "-c", "10", "-o", "0x100", "testdata/short", file1]
+        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
+        if cp.returncode != 0:
+            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+
+        file2 = os.path.join(tempfile.gettempdir(), "file2")
+        args = {
+            "cols": 10,
+            "decimal": True,
+            "uppercase": True,
+            "offset": "0x100",
+            "infile": os.path.join(project_root_dir, "testdata/short"),
+            "outfile": file2
+        }
+        app = HexDumper(args)
+        app.run()
+
+        self.assertTrue(filecmp.cmp(file1, file2))
+        os.remove(file1)
+        os.remove(file2)
+
+    def test_run_columns_20(self):
+        file1 = os.path.join(tempfile.gettempdir(), "file1")
+        parms = ["xxd", "-c", "20", "testdata/short", file1]
+        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
+        if cp.returncode != 0:
+            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+
+        file2 = os.path.join(tempfile.gettempdir(), "file2")
+        args = {
+            "cols": 20,
+            "infile": os.path.join(project_root_dir, "testdata/short"),
+            "outfile": file2
+        }
+        app = HexDumper(args)
+        app.run()
+
+        self.assertTrue(filecmp.cmp(file1, file2))
+        os.remove(file1)
+        os.remove(file2)

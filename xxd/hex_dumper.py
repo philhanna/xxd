@@ -26,12 +26,7 @@ class HexDumper:
                 offset += seek
 
         while True:
-            # Add entries to the chunk_size table as needed
-            chunk_size: int = {
-                HexType.HEX_BITS: 6,
-                HexType.HEX_NORMAL: 16,
-            }.get(self.hextype, 16)
-
+            chunk_size = self.cols
             if hasattr(self, "length"):
                 if so_far + chunk_size > self.length:
                     chunk_size = self.length % chunk_size
@@ -78,14 +73,12 @@ class HexDumper:
             else:
                 offset_format_str = "08x"
 
-            chars_per_hextype: int = {
+            group_width = {
                 HexType.HEX_BITS: 8,
-                HexType.HEX_NORMAL: 2,
-            }.get(self.hextype, 2)
-
+                HexType.HEX_NORMAL: 4
+            }.get(self.hextype, 4)
             n_groups = int(self.cols / self.octets_per_group)
-            group_width = 1 + self.octets_per_group * chars_per_hextype
-            data_width = n_groups * group_width
+            data_width = (1 + group_width) * n_groups   # Add 1 for the space separator
             line = f"{offset_shown:{offset_format_str}}: {sdata:{data_width}s} {text}\n"
             bline = line.encode('utf-8')
 
