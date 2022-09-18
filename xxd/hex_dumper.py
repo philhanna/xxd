@@ -49,9 +49,8 @@ class HexDumper:
                     sb += self.text_format(chunk[1])
                 text_list.append(sb)
             sdata = " ".join(hex_list)
-            if hasattr(self, "uppercase"):
-                if self.uppercase:
-                    sdata = sdata.upper()
+            if self.uppercase:
+                sdata = sdata.upper()
             text = "".join(text_list)
             offset_shown = offset
             if hasattr(self, "offset"):
@@ -60,7 +59,11 @@ class HexDumper:
                         self.offset = int(self.offset, 0)
                     add_offset = self.offset
                     offset_shown += add_offset
-            line = f"{offset_shown:08x}: {sdata:40s} {text}\n"
+            if self.decimal:
+                formatstr = "08d"
+            else:
+                formatstr = "08x"
+            line = f"{offset_shown:{formatstr}}: {sdata:40s} {text}\n"
             bline = line.encode('utf-8')
             try:
                 self.fpout.write(bline)
