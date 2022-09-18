@@ -166,7 +166,9 @@ class HexDumper:
         length = args.get("len", None)
         if length is not None:
             try:
-                self.length: int = int(length, 0)
+                if type(length) != int:
+                    length = int(length, 0)
+                self.length = length
             except ValueError as e:
                 errmsg = f"-l {length} is not numeric"
                 raise ValueError(errmsg)
