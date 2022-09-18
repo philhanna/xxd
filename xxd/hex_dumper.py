@@ -49,6 +49,9 @@ class HexDumper:
                     sb += self.text_format(chunk[1])
                 text_list.append(sb)
             sdata = " ".join(hex_list)
+            if hasattr(self, "uppercase"):
+                if self.uppercase:
+                    sdata = sdata.upper()
             text = "".join(text_list)
             offset_shown = offset
             if hasattr(self, "offset"):
