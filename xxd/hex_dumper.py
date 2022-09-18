@@ -1,7 +1,8 @@
 import os.path
-import pdb
 import sys
 from io import UnsupportedOperation
+
+from xxd import HexType, COLS
 
 
 class HexDumper:
@@ -24,7 +25,12 @@ class HexDumper:
                 offset += seek
 
         while True:
-            chunk_size = 16
+            # Add entries to the chunk_size table as needed
+            chunk_size: int = {
+                HexType.HEX_BITS: 6,
+                HexType.HEX_NORMAL: 16,
+            }.get(self.hextype, 16)
+
             if hasattr(self, "length"):
                 if so_far + chunk_size > self.length:
                     chunk_size = self.length % chunk_size
@@ -33,22 +39,30 @@ class HexDumper:
                 break
             if type(data) == str:
                 data = bytes(data.encode("utf-8"))
-            data_list = [data[i:i + 2] for i in range(0, len(data), 2)]
+
+            data_list = []
+            data_length = len(data)
+            for i in range(0, data_length, self.octets_per_group):
+                chunk_slice = slice(i, i + self.octets_per_group, 1)
+                chunk_bytes = data[chunk_slice]
+                data_list.append(chunk_bytes)
+
             hex_list = []
             text_list = []
-            for chunk in data_list:
+
+            for chunk_bytes in data_list:
                 sb = ""
-                sb += format(chunk[0], "02x")
-                if len(chunk) > 1:
-                    sb += format(chunk[1], "02x")
+                for chunk_byte in chunk_bytes:
+                    sb += self.data_format(chunk_byte)
                 hex_list.append(sb)
 
                 sb = ""
-                sb += self.text_format(chunk[0])
-                if len(chunk) > 1:
-                    sb += self.text_format(chunk[1])
+                for chunk_byte in chunk_bytes:
+                    sb += self.text_format(chunk_byte)
                 text_list.append(sb)
+
             sdata = " ".join(hex_list)
+            #print(f"DEBUG: sdata={sdata}")
             if self.uppercase:
                 sdata = sdata.upper()
             text = "".join(text_list)
@@ -60,21 +74,40 @@ class HexDumper:
                     add_offset = self.offset
                     offset_shown += add_offset
             if self.decimal:
-                formatstr = "08d"
+                offset_format_str = "08d"
             else:
-                formatstr = "08x"
-            line = f"{offset_shown:{formatstr}}: {sdata:40s} {text}\n"
+                offset_format_str = "08x"
+
+            chars_per_hextype: int = {
+                HexType.HEX_BITS: 8,
+                HexType.HEX_NORMAL: 2,
+            }.get(self.hextype, 2)
+
+            n_groups = int(self.cols / self.octets_per_group)
+            group_width = 1 + self.octets_per_group * chars_per_hextype
+            data_width = n_groups * group_width
+            line = f"{offset_shown:{offset_format_str}}: {sdata:{data_width}s} {text}\n"
             bline = line.encode('utf-8')
+            print(f"DEBUG: {bline=}")
             try:
                 self.fpout.write(bline)
             except TypeError as e:
                 self.fpout.write(line)
+            self.fpout.flush()
             offset += chunk_size
             so_far += len(data)
             if hasattr(self, "length"):
                 length = self.length
                 if so_far >= length:
                     break
+
+    def data_format(self, b):
+        result = None
+        if self.hextype == HexType.HEX_BITS:
+            result = format(b, "08b")
+        else:
+            result = format(b, "02x")
+        return result
 
     @staticmethod
     def text_format(c: int):
@@ -126,6 +159,7 @@ class HexDumper:
         self.fpin = None
         self.fpout = None
         self.autoskip: bool = args.get("autoskip", False)
+        self.hextype = HexType.HEX_NORMAL
 
         # Binary option is incompatible with -ps, -i, or -r
         self.binary: bool = args.get("binary", False)
@@ -133,6 +167,7 @@ class HexDumper:
             for other in ["postscript", "include", "reverse"]:
                 if other in args.keys() and args[other]:
                     raise ValueError("-b option is incompatible with -ps, -i, or -r.")
+            self.hextype = HexType.HEX_BITS
 
         self.capitalize: bool = args.get("capitalize", False)
 
@@ -145,6 +180,21 @@ class HexDumper:
             self.cols = 6
         else:
             self.cols = 16
+        if "cols" in args:  # See if an override was specified
+            attr_cols = args.get("cols", None)
+            if attr_cols is not None:
+                try:
+                    if type(attr_cols) != int:
+                        attr_cols: int = int(attr_cols, 0)
+                    self.cols = attr_cols
+                except ValueError as e:
+                    errmsg = f"-c {attr_cols} is not numeric"
+                    raise ValueError(errmsg)
+                if self.cols < 0:
+                    raise ValueError(f"-c {attr_cols} is not a non-negative integer")
+
+        if self.cols > COLS:
+            raise ValueError("Number of columns {self.cols} cannot be greater than {COLS}")
 
         self.EBCDIC: bool = args.get("EBCDIC", False)
 
@@ -158,7 +208,7 @@ class HexDumper:
         # Octets per group option has different defaults depending on other -e has been specified
         if "little_endian" in args:
             self.octets_per_group = 4
-        elif "binary" in args:
+        elif self.binary:
             self.octets_per_group = 1
         elif "postscript" in args:
             self.octets_per_group = 0
@@ -166,6 +216,19 @@ class HexDumper:
             self.octets_per_group = 0
         else:
             self.octets_per_group = 2
+
+        # check for overrides
+        attr_octets_per_group = args.get("octets_per_group", None)
+        if attr_octets_per_group is not None:
+            try:
+                if type(attr_octets_per_group) != int:
+                    attr_octets_per_group: int = int(attr_octets_per_group, 0)
+                self.octets_per_group = attr_octets_per_group
+            except ValueError as e:
+                errmsg = f"-o {attr_octets_per_group} is not numeric"
+                raise ValueError(errmsg)
+            if self.octets_per_group < 0:
+                raise ValueError(f"-o {attr_octets_per_group} is not a non-negative integer")
 
         self.include: bool = args.get("include", False)
 

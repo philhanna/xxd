@@ -42,6 +42,8 @@ parser.add_argument("-v", "--version", action="store_true",
 parser.add_argument("infile", nargs="?", help="input file name. Default \"-\" for stdin.")
 parser.add_argument("outfile", nargs="?", help="output file name. Default is stdout.")
 args = vars(parser.parse_args())
+for k, v in args.items():
+    print(f"DEBUG: {k:20s}= {v}")
 if args["version"]:
     sys.stderr.write(f"{version_string}{os_version}" + "\n")
     sys.exit(0)
