@@ -67,34 +67,12 @@ class TestRun(TestCase):
             "infile": os.path.join(project_root_dir, "testdata/short"),
             "outfile": file2
         }
-        # Override args to see if that makes a difference (issue #12)
-        args = {
-            "autoskip": False,
-            "binary": False,
-            "capitalize": False,
-            "cols": None,
-            "EBCDIC": False,
-            "little_endian": False,
-            "octets_per_group": None,
-            "include": False,
-            "len": None,
-            "name": None,
-            "offset": None,
-            "postscript": False,
-            "reverse": False,
-            "decimal": False,
-            "seek": None,
-            "uppercase": False,
-            "version": False,
-            "infile": os.path.join(project_root_dir, "testdata/short"),
-            "outfile": file2
-        }
         app = HexDumper(args)
         app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
-        #os.remove(file1)
-        #os.remove(file2)
+        os.remove(file1)
+        os.remove(file2)
 
     def test_run_binary(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
@@ -113,5 +91,5 @@ class TestRun(TestCase):
         app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
-        #os.remove(file1)
-        #os.remove(file2)
+        os.remove(file1)
+        os.remove(file2)

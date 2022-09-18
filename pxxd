@@ -46,10 +46,6 @@ if args["version"]:
     sys.stderr.write(f"{version_string}{os_version}" + "\n")
     sys.exit(0)
 
-print(f"DEBUG: Arguments passed by pxxd:")
-for k, v in args.items():
-    print(f"DEBUG: {k:20s} = {v}")
-
 try:
     xxd = HexDumper(args)
     xxd.run()

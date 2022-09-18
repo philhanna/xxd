@@ -11,12 +11,6 @@ class HexDumper:
     def mainline(self):
         """Runs the hex dumper"""
 
-        # Debugging for issue #12:
-
-        print(f"DEBUG: Arguments at beginning of mainline:")
-        for k, v in self.args.items():
-            print(f"DEBUG: {k:20s} = {v}")
-
         offset = 0
         so_far = 0
         if hasattr(self, "seek"):
@@ -69,7 +63,6 @@ class HexDumper:
                 text_list.append(sb)
 
             sdata = " ".join(hex_list)
-            # print(f"DEBUG: sdata={sdata}")
             if self.uppercase:
                 sdata = sdata.upper()
             text = "".join(text_list)
@@ -95,7 +88,7 @@ class HexDumper:
             data_width = n_groups * group_width
             line = f"{offset_shown:{offset_format_str}}: {sdata:{data_width}s} {text}\n"
             bline = line.encode('utf-8')
-            #print(f"DEBUG: {bline=}")
+
             try:
                 self.fpout.write(bline)
             except TypeError as e:
