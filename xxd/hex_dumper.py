@@ -50,7 +50,14 @@ class HexDumper:
                 text_list.append(sb)
             sdata = " ".join(hex_list)
             text = "".join(text_list)
-            line = f"{offset:08x}: {sdata:40s} {text}\n"
+            offset_shown = offset
+            if hasattr(self, "offset"):
+                if self.offset is not None:
+                    if type(self.offset) != int:
+                        self.offset = int(self.offset, 0)
+                    add_offset = self.offset
+                    offset_shown += add_offset
+            line = f"{offset_shown:08x}: {sdata:40s} {text}\n"
             bline = line.encode('utf-8')
             try:
                 self.fpout.write(bline)
@@ -168,15 +175,17 @@ class HexDumper:
 
         self.name: str = args.get("name", None)
 
-        offset = args.get("offset", 0)
-        if offset is not None:
-            if str(offset).isdigit() or str(offset)[1:].isdigit():
-                offset = int(offset)
-                if offset < 0:
-                    raise ValueError(f"{offset=} is not a non-negative integer")
-            else:
-                raise ValueError(f"{offset=} is not numeric")
-        self.offset: int = offset
+        attr_offset = args.get("offset", 0)
+        if attr_offset is not None:
+            try:
+                if type(attr_offset) != int:
+                    attr_offset: int = int(attr_offset, 0)
+                self.offset = attr_offset
+            except ValueError as e:
+                errmsg = f"-o {attr_offset} is not numeric"
+                raise ValueError(errmsg)
+            if self.offset < 0:
+                raise ValueError(f"{attr_offset=} is not a non-negative integer")
 
         self.postscript: bool = args.get("postscript", False)
         self.reverse: bool = args.get("reverse", False)
