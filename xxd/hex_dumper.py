@@ -10,6 +10,13 @@ class HexDumper:
 
     def mainline(self):
         """Runs the hex dumper"""
+
+        # Debugging for issue #12:
+
+        print(f"DEBUG: Arguments at beginning of mainline:")
+        for k, v in self.args.items():
+            print(f"DEBUG: {k:20s} = {v}")
+
         offset = 0
         so_far = 0
         if hasattr(self, "seek"):
@@ -62,7 +69,7 @@ class HexDumper:
                 text_list.append(sb)
 
             sdata = " ".join(hex_list)
-            #print(f"DEBUG: sdata={sdata}")
+            # print(f"DEBUG: sdata={sdata}")
             if self.uppercase:
                 sdata = sdata.upper()
             text = "".join(text_list)
@@ -88,7 +95,7 @@ class HexDumper:
             data_width = n_groups * group_width
             line = f"{offset_shown:{offset_format_str}}: {sdata:{data_width}s} {text}\n"
             bline = line.encode('utf-8')
-            print(f"DEBUG: {bline=}")
+            #print(f"DEBUG: {bline=}")
             try:
                 self.fpout.write(bline)
             except TypeError as e:
@@ -155,6 +162,8 @@ class HexDumper:
         Incompatible options raise a ValueError.
         """
 
+        self.args = args
+
         self.pname: str = sys.argv[0].split("/")[-1]
         self.fpin = None
         self.fpout = None
@@ -172,11 +181,11 @@ class HexDumper:
         self.capitalize: bool = args.get("capitalize", False)
 
         # Cols option has different defaults depending on whether -ps or -i have been specified
-        if "postscript" in args:
+        if args.get("postscript", False):
             self.cols = 30
-        elif "include" in args:
+        elif args.get("include", False):
             self.cols = 12
-        elif "binary" in args:
+        elif self.binary:
             self.cols = 6
         else:
             self.cols = 16
@@ -206,13 +215,13 @@ class HexDumper:
                     raise ValueError("-e option is incompatible with -ps, -i, or -r.")
 
         # Octets per group option has different defaults depending on other -e has been specified
-        if "little_endian" in args:
+        if args.get("little_endian", False):
             self.octets_per_group = 4
         elif self.binary:
             self.octets_per_group = 1
-        elif "postscript" in args:
+        elif args.get("postscript", False):
             self.octets_per_group = 0
-        elif "include" in args:
+        elif args.get("include", False):
             self.octets_per_group = 0
         else:
             self.octets_per_group = 2

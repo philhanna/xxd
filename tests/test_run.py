@@ -67,6 +67,28 @@ class TestRun(TestCase):
             "infile": os.path.join(project_root_dir, "testdata/short"),
             "outfile": file2
         }
+        # Override args to see if that makes a difference (issue #12)
+        args = {
+            "autoskip": False,
+            "binary": False,
+            "capitalize": False,
+            "cols": None,
+            "EBCDIC": False,
+            "little_endian": False,
+            "octets_per_group": None,
+            "include": False,
+            "len": None,
+            "name": None,
+            "offset": None,
+            "postscript": False,
+            "reverse": False,
+            "decimal": False,
+            "seek": None,
+            "uppercase": False,
+            "version": False,
+            "infile": os.path.join(project_root_dir, "testdata/short"),
+            "outfile": file2
+        }
         app = HexDumper(args)
         app.run()
 
