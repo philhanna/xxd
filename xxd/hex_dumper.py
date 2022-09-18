@@ -1,4 +1,5 @@
 import os.path
+import string
 import sys
 from io import UnsupportedOperation
 
@@ -24,6 +25,77 @@ class HexDumper:
                     for i in range(seek):
                         self.fpin.read(1)
                 offset += seek
+
+        ################################################################
+        # Handle c-include style output
+        ################################################################
+        if self.include:
+
+            # Function used within this block that writes either
+            # a string or bytes. This avoids having to write the
+            # logic in every self.fpout.write() in this block.
+            def write_line(line):
+                try:
+                    self.fpout.write(line)
+                except TypeError:
+                    line = bytes(line.encode("utf-8"))
+                    self.fpout.write(line)
+
+            # Print the C array heading
+            varname = self.infile
+
+            # Ensure that this is a valid C variable name
+            varname = HexDumper.convert_to_valid_c_variable_name(varname)
+
+            if self.capitalize:
+                varname = varname.upper()
+
+            # The varname is now cifyied
+            line = f"unsigned char {varname}[] = {{" + "\n"
+            write_line(line)
+            self.fpout.flush()
+
+            # Read bytes and write them as hex literals,
+            # writing output lines at every self.cols boundary
+            # and at end of file
+            n = 0
+            cinc = []
+            c = self.fpin.read(1)
+            while len(c) > 0:
+                if hasattr(self, "length"):
+                    if n >= self.length:
+                        break
+                n += 1
+                hex_literal = "0x" + format(ord(c), "02x")
+                cinc.append(hex_literal)
+                if n % self.cols == 0:
+                    line = "  " + ", ".join(cinc)
+                    cinc.clear()
+                    write_line(line)
+                c = self.fpin.read(1)
+                if n % self.cols == 0:
+                    if len(c) == 0:
+                        write_line("\n")
+                    else:
+                        if hasattr(self, 'length') and self.length == n:
+                            write_line("\n")
+                        else:
+                            write_line(",\n")
+            if len(cinc) > 0:
+                line = "  " + ", ".join(cinc)
+                write_line(line + "\n")
+            write_line("};\n")
+            self.fpout.flush()
+
+            # Now write array length
+            line = f"unsigned int {varname}_len = {n};\n"
+            write_line(line)
+            self.fpout.flush()
+
+            ############################################################
+            # Done with C-include operations
+            ############################################################
+            return
 
         while True:
             chunk_size = self.cols
@@ -78,7 +150,7 @@ class HexDumper:
                 HexType.HEX_NORMAL: 4
             }.get(self.hextype, 4)
             n_groups = int(self.cols / self.octets_per_group)
-            data_width = (1 + group_width) * n_groups   # Add 1 for the space separator
+            data_width = (1 + group_width) * n_groups  # Add 1 for the space separator
             line = f"{offset_shown:{offset_format_str}}: {sdata:{data_width}s} {text}\n"
             bline = line.encode('utf-8')
 
@@ -87,6 +159,7 @@ class HexDumper:
             except TypeError as e:
                 self.fpout.write(line)
             self.fpout.flush()
+
             offset += chunk_size
             so_far += len(data)
             if hasattr(self, "length"):
@@ -108,6 +181,19 @@ class HexDumper:
             return chr(c)
         else:
             return "."
+
+    @staticmethod
+    def convert_to_valid_c_variable_name(varname):
+        if varname[0].isdigit():
+            varname = "__" + varname[1:]
+        valid = []
+        for c in varname:
+            if c in string.ascii_letters or c in string.digits or c == "_":
+                valid.append(c)
+            else:
+                valid.append("_")
+        varname = "".join(valid)
+        return varname
 
     def run(self):
         """Calls mainline with specified input and output files"""
@@ -199,6 +285,9 @@ class HexDumper:
             for other in ["postscript", "include", "reverse"]:
                 if other in args.keys():
                     raise ValueError("-e option is incompatible with -ps, -i, or -r.")
+
+        # C-style includes
+        self.include = args.get("include", False)
 
         # Octets per group option has different defaults depending on other -e has been specified
         if args.get("little_endian", False):
