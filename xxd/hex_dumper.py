@@ -131,7 +131,7 @@ class HexDumper:
         self.binary: bool = args.get("binary", False)
         if self.binary:
             for other in ["postscript", "include", "reverse"]:
-                if other in args.keys():
+                if other in args.keys() and args[other]:
                     raise ValueError("-b option is incompatible with -ps, -i, or -r.")
 
         self.capitalize: bool = args.get("capitalize", False)
