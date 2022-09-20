@@ -124,26 +124,21 @@ class HexDumper:
             else:
 
                 # Handle normal output
-                data_list = []
-                data_length = len(data)
-                for i in range(0, data_length, self.octets_per_group):
-                    chunk_slice = slice(i, i + self.octets_per_group, 1)
-                    chunk_bytes = data[chunk_slice]
-                    data_list.append(chunk_bytes)
 
-                hex_list = []
-                text_list = []
+                data_list = [
+                    data[i : i + self.octets_per_group : 1]
+                    for i in range(0, len(data), self.octets_per_group)
+                ]
 
-                for chunk_bytes in data_list:
-                    sb = ""
-                    for chunk_byte in chunk_bytes:
-                        sb += self.data_format(chunk_byte)
-                    hex_list.append(sb)
+                hex_list = [
+                    "".join([self.data_format(b) for b in chunk_bytes])
+                    for chunk_bytes in data_list
+                ]
 
-                    sb = ""
-                    for chunk_byte in chunk_bytes:
-                        sb += self.text_format(chunk_byte)
-                    text_list.append(sb)
+                text_list = [
+                    "".join([self.text_format(b) for b in chunk_bytes])
+                    for chunk_bytes in data_list
+                ]
 
                 sdata = " ".join(hex_list)
                 if self.uppercase:
