@@ -98,6 +98,8 @@ class HexDumper:
             ############################################################
             return
 
+        self.autoskip_lines = []
+        self.autoskip_state = 0
         while True:
             chunk_size = self.cols
             if hasattr(self, "length"):
@@ -111,22 +113,17 @@ class HexDumper:
 
             # Handle postscript output
             if self.postscript:
-                line = ""
-                for b in data:
-                    b = self.data_format(b)
-                    line += b
+                line = "".join([self.data_format(b) for b in data]) + "\n"
                 try:
                     self.fpout.write(line)
-                    self.fpout.write("\n")
                 except TypeError:
                     self.fpout.write(line.encode('utf-8'))
-                    self.fpout.write("\n".encode('utf-8'))
             else:
 
                 # Handle normal output
 
                 data_list = [
-                    data[i : i + self.octets_per_group : 1]
+                    data[i: i + self.octets_per_group: 1]
                     for i in range(0, len(data), self.octets_per_group)
                 ]
 
@@ -163,13 +160,11 @@ class HexDumper:
                 n_groups = int(self.cols / self.octets_per_group)
                 data_width = (1 + group_width) * n_groups  # Add 1 for the space separator
                 line = f"{offset_shown:{offset_format_str}}: {sdata:{data_width}s} {text}\n"
-                bline = line.encode('utf-8')
 
-                try:
-                    self.fpout.write(bline)
-                except TypeError as e:
-                    self.fpout.write(line)
-                self.fpout.flush()
+                if not self.autoskip:
+                    self.xxd_line(line)
+                else:
+                    self.xxd_line_autoskip(line, sdata)
 
                 # Done with normal output
 
@@ -179,6 +174,106 @@ class HexDumper:
                 length = self.length
                 if so_far >= length:
                     break
+
+        if self.autoskip:
+            if self.autoskip_state == 0:
+                pass
+            elif self.autoskip_state == 1:
+                self.xxd_line(self.autoskip_lines[0])
+            elif self.autoskip_state == 2:
+                self.xxd_line(self.autoskip_lines[0])
+                self.xxd_line(self.autoskip_lines[1])
+            elif self.autoskip_state == 3:
+                self.xxd_line(self.autoskip_lines[0])
+                self.xxd_line("*\n")
+                self.xxd_line(self.autoskip_lines[-1])
+
+    def xxd_line(self, line):
+        bline = line.encode('utf-8')
+        try:
+            self.fpout.write(bline)
+        except TypeError as e:
+            self.fpout.write(line)
+        self.fpout.flush()
+
+    def xxd_line_autoskip(self, line: str, sdata: str):
+        sdata = sdata.replace(" ", "")
+        allzero = all([c == "0" for c in sdata])
+
+        if self.autoskip_state == 0:
+            # The preceding line was non-zero and already printed
+            # The array is empty
+            # OR
+            # The preceding line was zeros and has not yet been printed
+            # The array has multiple lines
+            if allzero:
+                if len(self.autoskip_lines) == 0:
+                    self.autoskip_lines.append(line)
+                    self.autoskip_state = 1
+                else:
+                    self.xxd_line(self.autoskip_lines[0])
+                    self.autoskip_lines.clear()
+                    self.xxd_line("*\n")
+                    self.autoskip_lines.append(line)
+                    self.autoskip_state = 1
+            else:
+                self.xxd_line(line)
+                self.autoskip_state = 0
+                # Print the current line normally
+
+        elif self.autoskip_state == 1:
+            # The preceding line was zeros and not printed
+            # The array has one line
+            if allzero:
+                self.autoskip_lines.append(line)
+                self.autoskip_state = 2
+                # Still nothing printed
+                # The array now has two rows of zeros
+            else:
+                self.xxd_line(self.autoskip_lines[0])
+                self.xxd_line(line)
+                self.autoskip_state = 0
+                # The saved row of zeros is printed
+                # The array is cleard
+                # The current line is printed
+
+        elif self.autoskip_state == 2:
+            # The preceding line was zeros and not printed
+            # The array has two lines of zeros
+            if allzero:
+                self.autoskip_lines.append(line)
+                self.autoskip_state = 3
+                # Still nothing printed
+                # The array now has three rows of zeros
+            else:
+                self.xxd_line(self.autoskip_lines[0])
+                self.xxd_line(self.autoskip_lines[1])
+                self.autoskip_lines.clear()
+                self.xxd_line(line)
+                self.autoskip_state = 0
+                # The two saved rows of zeros are printed
+                # The array is cleard
+                # The current line is printed
+
+        elif self.autoskip_state == 3:
+            # The preceding line was zeros and not printed
+            # The array has three or more lines of zeros
+            if allzero:
+                self.autoskip_lines.append(line)
+                self.autoskip_state = 3
+                # Still nothing printed
+                # The array now has four or more rows of zeros
+            else:
+                self.xxd_line(self.autoskip_lines[0])
+                self.xxd_line("*\n")
+                self.autoskip_lines.clear()
+                self.xxd_line(line)
+                self.autoskip_state = 0
+                # The first saved row of zeros are printed
+                # A row of "*" is printed
+                # The current line is printed.
+                # Can't clear the array yet because we need the last line
+                # if end of file
 
     def data_format(self, b):
         result = None
@@ -254,6 +349,8 @@ class HexDumper:
         self.fpin = None
         self.fpout = None
         self.autoskip: bool = args.get("autoskip", False)
+        self.autoskip_lines = None
+        self.autoskip_state = None
         self.hextype = HexType.HEX_NORMAL
 
         # Binary option is incompatible with -ps, -i, or -r

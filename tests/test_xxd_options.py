@@ -13,6 +13,10 @@ class TestXXDOptions(TestCase):
         xxd = HexDumper({})
         self.assertFalse(xxd.autoskip)
 
+    def test_autoskip_true(self):
+        xxd = HexDumper({"autoskip": True})
+        self.assertTrue(xxd.autoskip)
+
     # The -b option is incompatible with -ps, -i, or -r
     def test_binary_conflict_postscript(self):
         with self.assertRaises(ValueError) as err:
