@@ -43,7 +43,7 @@ class HexDumper:
                     self.fpout.write(line)
 
             # Print the C array heading
-            varname = self.infile
+            varname = self.infile if not self.name else self.name
 
             # Ensure that this is a valid C variable name
             varname = HexDumper.convert_to_valid_c_variable_name(varname)
@@ -204,7 +204,7 @@ class HexDumper:
     @staticmethod
     def convert_to_valid_c_variable_name(varname):
         if varname[0].isdigit():
-            varname = "__" + varname[1:]
+            varname = "__" + varname
         valid = []
         for c in varname:
             if c in string.ascii_letters or c in string.digits or c == "_":

@@ -13,7 +13,7 @@ class TestConvertToValidCVariableName(TestCase):
 
     def test_1(self):
         bad_name = "3"
-        expected = "__"
+        expected = "__3"
         actual = HexDumper.convert_to_valid_c_variable_name(bad_name)
         self.assertEqual(expected, actual)
 
@@ -25,7 +25,7 @@ class TestConvertToValidCVariableName(TestCase):
 
     def test_3(self):
         bad_name = "3testdata/short"
-        expected = "__testdata_short"
+        expected = "__3testdata_short"
         actual = HexDumper.convert_to_valid_c_variable_name(bad_name)
         self.assertEqual(expected, actual)
 
