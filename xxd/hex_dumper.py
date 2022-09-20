@@ -296,7 +296,7 @@ class HexDumper:
         elif self.binary:
             self.octets_per_group = 1
         elif args.get("postscript", False):
-            self.octets_per_group = 0
+            self.octets_per_group = 2
         elif args.get("include", False):
             self.octets_per_group = 0
         else:

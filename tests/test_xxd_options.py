@@ -101,7 +101,7 @@ class TestXXDOptions(TestCase):
 
     def test_g_ps(self):
         xxd = HexDumper({"postscript": True})
-        expected = 0
+        expected = 2
         actual = xxd.octets_per_group
         self.assertEqual(expected, actual)
 
