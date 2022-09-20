@@ -1,4 +1,5 @@
 import os.path
+import pdb
 import string
 import sys
 from io import UnsupportedOperation
@@ -108,57 +109,74 @@ class HexDumper:
             if type(data) == str:
                 data = bytes(data.encode("utf-8"))
 
-            data_list = []
-            data_length = len(data)
-            for i in range(0, data_length, self.octets_per_group):
-                chunk_slice = slice(i, i + self.octets_per_group, 1)
-                chunk_bytes = data[chunk_slice]
-                data_list.append(chunk_bytes)
-
-            hex_list = []
-            text_list = []
-
-            for chunk_bytes in data_list:
-                sb = ""
-                for chunk_byte in chunk_bytes:
-                    sb += self.data_format(chunk_byte)
-                hex_list.append(sb)
-
-                sb = ""
-                for chunk_byte in chunk_bytes:
-                    sb += self.text_format(chunk_byte)
-                text_list.append(sb)
-
-            sdata = " ".join(hex_list)
-            if self.uppercase:
-                sdata = sdata.upper()
-            text = "".join(text_list)
-            offset_shown = offset
-            if hasattr(self, "offset"):
-                if self.offset is not None:
-                    if type(self.offset) != int:
-                        self.offset = int(self.offset, 0)
-                    add_offset = self.offset
-                    offset_shown += add_offset
-            if self.decimal:
-                offset_format_str = "08d"
+            # Handle postscript output
+            if self.postscript:
+                line = ""
+                for b in data:
+                    b = self.data_format(b)
+                    line += b
+                try:
+                    self.fpout.write(line)
+                    self.fpout.write("\n")
+                except TypeError:
+                    self.fpout.write(line.encode('utf-8'))
+                    self.fpout.write("\n".encode('utf-8'))
             else:
-                offset_format_str = "08x"
 
-            group_width = {
-                HexType.HEX_BITS: 8,
-                HexType.HEX_NORMAL: 4
-            }.get(self.hextype, 4)
-            n_groups = int(self.cols / self.octets_per_group)
-            data_width = (1 + group_width) * n_groups  # Add 1 for the space separator
-            line = f"{offset_shown:{offset_format_str}}: {sdata:{data_width}s} {text}\n"
-            bline = line.encode('utf-8')
+                # Handle normal output
+                data_list = []
+                data_length = len(data)
+                for i in range(0, data_length, self.octets_per_group):
+                    chunk_slice = slice(i, i + self.octets_per_group, 1)
+                    chunk_bytes = data[chunk_slice]
+                    data_list.append(chunk_bytes)
 
-            try:
-                self.fpout.write(bline)
-            except TypeError as e:
-                self.fpout.write(line)
-            self.fpout.flush()
+                hex_list = []
+                text_list = []
+
+                for chunk_bytes in data_list:
+                    sb = ""
+                    for chunk_byte in chunk_bytes:
+                        sb += self.data_format(chunk_byte)
+                    hex_list.append(sb)
+
+                    sb = ""
+                    for chunk_byte in chunk_bytes:
+                        sb += self.text_format(chunk_byte)
+                    text_list.append(sb)
+
+                sdata = " ".join(hex_list)
+                if self.uppercase:
+                    sdata = sdata.upper()
+                text = "".join(text_list)
+                offset_shown = offset
+                if hasattr(self, "offset"):
+                    if self.offset is not None:
+                        if type(self.offset) != int:
+                            self.offset = int(self.offset, 0)
+                        add_offset = self.offset
+                        offset_shown += add_offset
+                if self.decimal:
+                    offset_format_str = "08d"
+                else:
+                    offset_format_str = "08x"
+
+                group_width = {
+                    HexType.HEX_BITS: 8,
+                    HexType.HEX_NORMAL: 4
+                }.get(self.hextype, 4)
+                n_groups = int(self.cols / self.octets_per_group)
+                data_width = (1 + group_width) * n_groups  # Add 1 for the space separator
+                line = f"{offset_shown:{offset_format_str}}: {sdata:{data_width}s} {text}\n"
+                bline = line.encode('utf-8')
+
+                try:
+                    self.fpout.write(bline)
+                except TypeError as e:
+                    self.fpout.write(line)
+                self.fpout.flush()
+
+                # Done with normal output
 
             offset += chunk_size
             so_far += len(data)

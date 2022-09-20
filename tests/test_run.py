@@ -210,3 +210,30 @@ class TestRun(TestCase):
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
         os.remove(file2)
+
+    def test_run_postscript(self):
+        file1 = os.path.join(tempfile.gettempdir(), "file1")
+        parms = ["xxd", "-ps", "testdata/short", file1]
+        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
+        if cp.returncode != 0:
+            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+
+        file2 = os.path.join(tempfile.gettempdir(), "file2")
+        args = {
+            "postscript": True,
+            "infile": "testdata/short",
+            "outfile": file2
+        }
+
+        # Need to chdir so that the input file is found.
+        # I can't specify a full path because that's what is used
+        # to form the varname of the include file
+        save_cwd = os.getcwd()
+        os.chdir(project_root_dir)
+        app = HexDumper(args)
+        app.run()
+        os.chdir(save_cwd)
+
+        self.assertTrue(filecmp.cmp(file1, file2))
+        os.remove(file1)
+        os.remove(file2)
