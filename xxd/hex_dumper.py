@@ -3,7 +3,7 @@ import string
 import sys
 from io import UnsupportedOperation
 
-from xxd import HexType, COLS
+from xxd import HexType, COLS, ebcdic_table
 
 
 class HexDumper:
@@ -175,8 +175,9 @@ class HexDumper:
             result = format(b, "02x")
         return result
 
-    @staticmethod
-    def text_format(c: int):
+    def text_format(self, c: int):
+        if self.EBCDIC:
+            c = ebcdic_table[c]
         if c < 128 and chr(c).isprintable():
             return chr(c)
         else:
