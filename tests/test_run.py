@@ -349,7 +349,7 @@ class TestRun(TestCase):
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
-            "seek": 0x100,
+            "seek": "0x100",
             "infile": "testdata/short",
             "outfile": file2
         }
@@ -359,6 +359,34 @@ class TestRun(TestCase):
         app = HexDumper(args)
         app.run()
         os.chdir(save_cwd)
+
+        self.assertTrue(filecmp.cmp(file1, file2))
+        os.remove(file1)
+        os.remove(file2)
+
+    def test_seek_with_stdin(self):
+        """ Unit test with --seek and stdin"""
+        file1 = os.path.join(tempfile.gettempdir(), "file1")
+        parms = ["xxd", "-s", "0x01", "-", file1]
+        cp = subprocess.run(parms,
+                            cwd=project_root_dir,
+                            input="abcdefg".encode("utf-8"),
+                            stdout=subprocess.PIPE)
+        if cp.returncode != 0:
+            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+
+        with StringIO("abcdefg") as fpin:
+            with stdin_redirected(fpin):
+                file2 = os.path.join(tempfile.gettempdir(), "file2")
+                args = {
+                    "seek": 0x1,
+                    "outfile": file2
+                }
+                save_cwd = os.getcwd()
+                os.chdir(project_root_dir)
+                app = HexDumper(args)
+                app.run()
+                os.chdir(save_cwd)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
