@@ -154,7 +154,7 @@ class TestRun(TestCase):
 
     def test_include(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
-        parms = ["xxd", "-i", "-l", "60", "testdata/short", file1]
+        parms = ["xxd", "-i", "-l", "60", "-C", "testdata/short", file1]
         cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
         if cp.returncode != 0:
             raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
@@ -163,6 +163,7 @@ class TestRun(TestCase):
         args = {
             "include": True,
             "len": 60,
+            "capitalize": True,
             "infile": "testdata/short",
             "outfile": file2
         }
