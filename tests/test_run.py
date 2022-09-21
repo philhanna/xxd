@@ -380,7 +380,7 @@ class TestRun(TestCase):
             with stdin_redirected(fpin):
                 file2 = os.path.join(tempfile.gettempdir(), "file2")
                 args = {
-                    "seek": 0x1,
+                    "seek": "0x01",
                     "outfile": file2
                 }
                 save_cwd = os.getcwd()

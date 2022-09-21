@@ -26,7 +26,10 @@ class TestReverse(TestCase):
                 infile,
                 file1
             ]
-            cp = subprocess.run(parms, stdout = subprocess.PIPE)
+            cp = subprocess.run(parms, stdout=subprocess.PIPE)
+            if cp.returncode != 0:
+                errmsg = f"Bad return code {cp.returncode} from running {parms[0]}"
+                raise RuntimeError(errmsg)
 
             # Now run pxxd to reverse the file transformation
             _, file2 = tempfile.mkstemp()

@@ -15,17 +15,14 @@ class HexDumper:
 
         offset = 0
         so_far = 0
-        if hasattr(self, "seek"):
-            if self.seek is not None:
-                seek = self.seek
-                if type(seek) != int:
-                    seek = int(seek, 0)
-                try:
-                    self.fpin.seek(seek)
-                except UnsupportedOperation as e:
-                    for i in range(seek):
-                        self.fpin.read(1)
-                offset += seek
+        if self.seek:
+            seek = self.seek
+            try:
+                self.fpin.seek(seek)
+            except UnsupportedOperation as e:
+                for i in range(seek):
+                    self.fpin.read(1)
+            offset += seek
 
         ################################################################
         # Handle c-include style output
@@ -295,7 +292,10 @@ class HexDumper:
                 self.fpout = open(self.outfile, "wb")
 
             # Run the mainline
-            self.mainline()
+            if self.reverse:
+                self.mainline_reverse()
+            else:
+                self.mainline()
 
         # Close the files
         finally:
@@ -427,6 +427,8 @@ class HexDumper:
         self.reverse: bool = args.get("reverse", False)
         self.decimal: bool = args.get("decimal", False)
         self.seek = args.get("seek", 0)
+        if type(self.seek) != int:
+            self.seek = int(self.seek, 0)
         self.uppercase: bool = args.get("uppercase", False)
         self.version: bool = args.get("version", False)
 
@@ -435,3 +437,9 @@ class HexDumper:
             if not os.path.exists(self.infile):
                 raise RuntimeError(f"{self.pname}: {self.infile}: No such file or directory")
         self.outfile: str = args.get("outfile", None)
+
+    def mainline_reverse(self):
+        """Recreates original file from the hex ougput"""
+        if self.seek:
+            pass
+        pass
