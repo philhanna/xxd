@@ -11,24 +11,12 @@ from xxd import HexDumper
 
 class TestRun(TestCase):
 
-    def test_run_default(self):
+    def test_default(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "testdata/short", file1]
         cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
         if cp.returncode != 0:
             raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
-
-        file2 = os.path.join(tempfile.gettempdir(), "file2")
-        args = {
-            "infile": os.path.join(project_root_dir, "testdata/short"),
-            "outfile": file2
-        }
-        app = HexDumper(args)
-        app.run()
-
-        self.assertTrue(filecmp.cmp(file1, file2))
-        os.remove(file1)
-        os.remove(file2)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -82,11 +70,7 @@ class TestRun(TestCase):
         os.remove(file1)
         os.remove(file2)
 
-<<<<<<< HEAD
     def test_binary(self):
-=======
-    def test_run_binary(self):
->>>>>>> f27a44e (Moved test_run_default() to top of file)
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-b", "testdata/short", file1]
         cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
