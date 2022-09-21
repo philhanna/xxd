@@ -1,32 +1,43 @@
+import os
 import subprocess
-import sys
 import tempfile
-from io import StringIO, BytesIO
 from unittest import TestCase
 
-from tests import project_root_dir, stdin_redirected
+from tests import project_root_dir
+from xxd import HexDumper
 
 
 class TestReverse(TestCase):
 
     def test_reverse(self):
         # Create the temporary output file for xxd
-        _, a = tempfile.mkstemp()
+        _, infile = tempfile.mkstemp()
         indata = "Now is the time for all good men to come to the aid of their party."
-        with StringIO(indata) as fp:
-            with stdin_redirected(fp):
-                parms = ["xxd"]
-                cp = subprocess.run(parms,
-                                    input=sys.stdin,
-                                    cwd=project_root_dir,
-                                    stdout=subprocess.PIPE)
-                if cp.returncode != 0:
-                    errmsg = f"Bad return code {cp.returncode} from running {parms[0]}"
-                    raise RuntimeError(errmsg)
+        with open(infile, "wt") as fp:
+            fp.write(indata + "\n")
 
-        # Create temporary file for the output of xxd -r
-        _, b = tempfile.mkstemp()
-        parms = ["xxd", "-r", a, b]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        # Run xxd on the file
+        _, file1 = tempfile.mkstemp()
+        save_cwd = os.getcwd()
+        try:
+            os.chdir(project_root_dir)
+            parms = [
+                "xxd",
+                infile,
+                file1
+            ]
+            cp = subprocess.run(parms, stdout = subprocess.PIPE)
+
+            # Now run pxxd to reverse the file transformation
+            _, file2 = tempfile.mkstemp()
+            args = {
+                "reverse": True,
+                "infile": file1,
+                "outfile": file2
+            }
+            app = HexDumper(args)
+            app.run()
+        finally:
+            os.chdir(save_cwd)
+
+
