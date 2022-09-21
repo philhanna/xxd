@@ -201,79 +201,49 @@ class HexDumper:
         allzero = all([c == "0" for c in sdata])
 
         if self.autoskip_state == 0:
-            # The preceding line was non-zero and already printed
-            # The array is empty
-            # OR
-            # The preceding line was zeros and has not yet been printed
-            # The array has multiple lines
             if allzero:
                 if len(self.autoskip_lines) == 0:
                     self.autoskip_lines.append(line)
-                    self.autoskip_state = 1
                 else:
                     self.xxd_line(self.autoskip_lines[0])
                     self.autoskip_lines.clear()
                     self.xxd_line("*\n")
                     self.autoskip_lines.append(line)
-                    self.autoskip_state = 1
+                self.autoskip_state = 1
             else:
                 self.xxd_line(line)
                 self.autoskip_state = 0
-                # Print the current line normally
 
         elif self.autoskip_state == 1:
-            # The preceding line was zeros and not printed
-            # The array has one line
             if allzero:
                 self.autoskip_lines.append(line)
                 self.autoskip_state = 2
-                # Still nothing printed
-                # The array now has two rows of zeros
             else:
                 self.xxd_line(self.autoskip_lines[0])
                 self.xxd_line(line)
                 self.autoskip_state = 0
-                # The saved row of zeros is printed
-                # The array is cleard
-                # The current line is printed
 
         elif self.autoskip_state == 2:
-            # The preceding line was zeros and not printed
-            # The array has two lines of zeros
             if allzero:
                 self.autoskip_lines.append(line)
                 self.autoskip_state = 3
-                # Still nothing printed
-                # The array now has three rows of zeros
             else:
                 self.xxd_line(self.autoskip_lines[0])
                 self.xxd_line(self.autoskip_lines[1])
                 self.autoskip_lines.clear()
                 self.xxd_line(line)
                 self.autoskip_state = 0
-                # The two saved rows of zeros are printed
-                # The array is cleard
-                # The current line is printed
 
         elif self.autoskip_state == 3:
-            # The preceding line was zeros and not printed
-            # The array has three or more lines of zeros
             if allzero:
                 self.autoskip_lines.append(line)
                 self.autoskip_state = 3
-                # Still nothing printed
-                # The array now has four or more rows of zeros
             else:
                 self.xxd_line(self.autoskip_lines[0])
                 self.xxd_line("*\n")
                 self.autoskip_lines.clear()
                 self.xxd_line(line)
                 self.autoskip_state = 0
-                # The first saved row of zeros are printed
-                # A row of "*" is printed
-                # The current line is printed.
-                # Can't clear the array yet because we need the last line
-                # if end of file
 
     def data_format(self, b):
         result = None
