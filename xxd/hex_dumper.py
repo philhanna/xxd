@@ -1,5 +1,6 @@
 import os.path
 import pdb
+import re
 import string
 import sys
 from io import UnsupportedOperation
@@ -439,7 +440,32 @@ class HexDumper:
         self.outfile: str = args.get("outfile", None)
 
     def mainline_reverse(self):
-        """Recreates original file from the hex ougput"""
+        """Recreates original file from the hex output"""
         if self.seek:
-            pass
-        pass
+            for i in range(self.seek):
+                self.fpout.write(b'\x00')
+
+        for line in self.fpin.readlines():
+
+            # Convert to string
+            line = str(line)
+            if not self.postscript:
+                # Skip the offset
+                p = line.find(": ")
+                if p < 0:
+                    continue
+                line = line[p + 2:]
+
+                # Skip the text
+                q = line.find("  ")
+                if q < 0:
+                    continue
+                line = line[0:q]
+
+            # Get the hex pairs, convert to characters, and write to output
+            hex_pairs = [int(hex_pair, 16)
+                         for hex_pair
+                         in re.findall("[0-9a-fA-F]{2}", line)]
+            for c in hex_pairs:
+                b = bytes([c])
+                self.fpout.write(b)
