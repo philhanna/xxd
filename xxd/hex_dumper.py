@@ -429,6 +429,7 @@ class HexDumper:
         self.decimal: bool = args.get("decimal", False)
         self.seek = args.get("seek", 0)
         if type(self.seek) != int:
+            sys.stdout.flush()
             self.seek = int(self.seek, 0)
         self.uppercase: bool = args.get("uppercase", False)
         self.version: bool = args.get("version", False)
