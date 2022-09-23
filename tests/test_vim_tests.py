@@ -1,7 +1,7 @@
 import os
 import subprocess
 import tempfile
-from io import BytesIO
+from io import BytesIO, StringIO
 from unittest import TestCase
 
 from tests import stdout_redirected, stdin_redirected, project_root_dir
@@ -147,3 +147,26 @@ class TestVimTests(TestCase):
 
         os.remove(testdata)
         os.remove(expected_file)
+
+    def test5(self):
+        """Test 5: Print 120 bytes as continuous hexdump with 20 octets per line"""
+        testdata = os.path.join(project_root_dir, "testdata")
+        infile = os.path.join(testdata, "xxd.1")
+        with StringIO() as fp:
+            with stdout_redirected(fp):
+                args = {
+                    "postscript": True,
+                    "len": 120,
+                    "cols": 20,
+                    "infile": infile
+                }
+                app = HexDumper(args)
+                app.run()
+                actual = fp.getvalue()
+
+        filename = os.path.join(os.path.join(project_root_dir, 'testdata'), "man_copy.ps.expected")
+        with open(filename, "rt") as fp:
+            expected = fp.read()
+
+        self.assertEqual(expected, actual)
+
