@@ -1,3 +1,4 @@
+import os
 import subprocess
 import tempfile
 from io import BytesIO
@@ -106,3 +107,43 @@ class TestVimTests(TestCase):
 
             # Compare the results
             self.assertTrue(testdata, outfile)
+            os.remove(outfile)
+
+        os.remove(testdata)
+        os.remove(expected_file)
+
+    def test4(self):
+        """TTest 4: Skip the first 30 bytes"""
+
+        # Create the input file, a list of numbers from 1 to 30
+        _, testdata = tempfile.mkstemp()
+        with open(testdata, "wt") as fp:
+            fp.write(get_test_list())
+
+        # Create the expected output file
+        expected = "00000031: 300a 3231 0a32 320a 3233 0a32 340a 3235  0.21.22.23.24.25\n"\
+                   + "00000041: 0a32 360a 3237 0a32 380a 3239 0a33 300a  .26.27.28.29.30."
+        _, expected_file = tempfile.mkstemp()
+        with open(expected_file, "wt") as fp:
+            fp.write(expected)
+
+        for arg in ['-s 0x31', '-s0x31']:
+            filename = "./pxxd"
+            parms = [filename]
+            for token in arg.split():
+                parms.append(token)
+            parms.append(testdata)
+            _, outfile = tempfile.mkstemp()
+            parms.append(outfile)
+
+            # Run the command
+            cp = subprocess.run(parms, cwd=project_root_dir)
+            if cp.returncode != 0:
+                raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+
+            # Compare the results
+            self.assertTrue(testdata, outfile)
+            os.remove(outfile)
+
+        os.remove(testdata)
+        os.remove(expected_file)
