@@ -136,6 +136,8 @@ class HexDumper:
                 ]
 
                 sdata = " ".join(hex_list)
+                if self.cols % 2 == 1:
+                    sdata += " "
                 if self.uppercase:
                     sdata = sdata.upper()
                 text = "".join(text_list)

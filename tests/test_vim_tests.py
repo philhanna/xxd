@@ -184,8 +184,5 @@ class TestVimTests(TestCase):
                 app = HexDumper(args)
                 app.run()
                 actual = out.getvalue()
-        expected = "00000036: 3231 7374 204d 6179 2031 3939 36  21st May 1996"
-
-        print(f"DEBUG: expected={expected}", file=sys.stderr)
-        print(f"DEBUG: actual  ={actual}  ", file=sys.stderr)
+        expected = "00000036: 3231 7374 204d 6179 2031 3939 36  21st May 1996\n"
         self.assertEqual(expected, actual)
