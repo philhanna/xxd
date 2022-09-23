@@ -1,10 +1,11 @@
 import os
 import subprocess
+import sys
 import tempfile
 from io import BytesIO, StringIO
 from unittest import TestCase
 
-from tests import stdout_redirected, stdin_redirected, project_root_dir
+from tests import stdout_redirected, stdin_redirected, project_root_dir, test_data_dir
 from xxd import HexDumper
 
 
@@ -17,11 +18,11 @@ def get_xxd_of_test_list(start_line=0):
     """Returns the hex dump of the test data list"""
     data = (
             '00000000: 310a 320a 330a 340a 350a 360a 370a 380a  1.2.3.4.5.6.7.8.' + "\n"
-            '00000010: 390a 3130 0a31 310a 3132 0a31 330a 3134  9.10.11.12.13.14' + "\n"
-            '00000020: 0a31 350a 3136 0a31 370a 3138 0a31 390a  .15.16.17.18.19.' + "\n"
-            '00000030: 3230 0a32 310a 3232 0a32 330a 3234 0a32  20.21.22.23.24.2' + "\n"
-            '00000040: 350a 3236 0a32 370a 3238 0a32 390a 3330  5.26.27.28.29.30' + "\n"
-            '00000050: 0a                                       .' + "\n"
+                                                                                    '00000010: 390a 3130 0a31 310a 3132 0a31 330a 3134  9.10.11.12.13.14' + "\n"
+                                                                                                                                                            '00000020: 0a31 350a 3136 0a31 370a 3138 0a31 390a  .15.16.17.18.19.' + "\n"
+                                                                                                                                                                                                                                    '00000030: 3230 0a32 310a 3232 0a32 330a 3234 0a32  20.21.22.23.24.2' + "\n"
+                                                                                                                                                                                                                                                                                                            '00000040: 350a 3236 0a32 370a 3238 0a32 390a 3330  5.26.27.28.29.30' + "\n"
+                                                                                                                                                                                                                                                                                                                                                                                    '00000050: 0a                                       .' + "\n"
     )
     line_length = len('00000000: 310a 320a 330a 340a 350a 360a 370a 380a  1.2.3.4.5.6.7.8.' + "\n")
     offset = line_length * start_line
@@ -121,7 +122,7 @@ class TestVimTests(TestCase):
             fp.write(get_test_list())
 
         # Create the expected output file
-        expected = "00000031: 300a 3231 0a32 320a 3233 0a32 340a 3235  0.21.22.23.24.25\n"\
+        expected = "00000031: 300a 3231 0a32 320a 3233 0a32 340a 3235  0.21.22.23.24.25\n" \
                    + "00000041: 0a32 360a 3237 0a32 380a 3239 0a33 300a  .26.27.28.29.30."
         _, expected_file = tempfile.mkstemp()
         with open(expected_file, "wt") as fp:
@@ -150,8 +151,7 @@ class TestVimTests(TestCase):
 
     def test5(self):
         """Test 5: Print 120 bytes as continuous hexdump with 20 octets per line"""
-        testdata = os.path.join(project_root_dir, "testdata")
-        infile = os.path.join(testdata, "xxd.1")
+        infile = os.path.join(test_data_dir, "xxd.1")
         with StringIO() as fp:
             with stdout_redirected(fp):
                 args = {
@@ -168,4 +168,24 @@ class TestVimTests(TestCase):
         with open(filename, "rt") as fp:
             expected = fp.read()
 
+        self.assertEqual(expected, actual)
+
+    def test_6(self):
+        """Test 6: Print the date from xxd.1"""
+        infile = os.path.join(test_data_dir, "xxd.1")
+        with StringIO() as out:
+            with stdout_redirected(out):
+                args = {
+                    "seek": 0x36,
+                    "len": 13,
+                    "cols": 13,
+                    "infile": infile
+                }
+                app = HexDumper(args)
+                app.run()
+                actual = out.getvalue()
+        expected = "00000036: 3231 7374 204d 6179 2031 3939 36  21st May 1996"
+
+        print(f"DEBUG: expected={expected}", file=sys.stderr)
+        print(f"DEBUG: actual  ={actual}  ", file=sys.stderr)
         self.assertEqual(expected, actual)
