@@ -87,7 +87,10 @@ class HexDumper:
             self.fpout.flush()
 
             # Now write array length
-            line = f"unsigned int {varname}_len = {n};\n"
+            varname_len = f"{varname}_len"
+            if self.capitalize:
+                varname_len = varname_len.upper()
+            line = f"unsigned int {varname_len} = {n};\n"
             write_line(line)
             self.fpout.flush()
 
