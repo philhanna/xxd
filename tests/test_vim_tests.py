@@ -1,6 +1,5 @@
 import os
 import subprocess
-import sys
 import tempfile
 from io import BytesIO, StringIO
 from unittest import TestCase
@@ -16,17 +15,16 @@ def get_test_list():
 
 def get_xxd_of_test_list(start_line=0):
     """Returns the hex dump of the test data list"""
-    data = (
-            '00000000: 310a 320a 330a 340a 350a 360a 370a 380a  1.2.3.4.5.6.7.8.' + "\n"
-            '00000010: 390a 3130 0a31 310a 3132 0a31 330a 3134  9.10.11.12.13.14' + "\n"
-            '00000020: 0a31 350a 3136 0a31 370a 3138 0a31 390a  .15.16.17.18.19.' + "\n"
-            '00000030: 3230 0a32 310a 3232 0a32 330a 3234 0a32  20.21.22.23.24.2' + "\n"
-            '00000040: 350a 3236 0a32 370a 3238 0a32 390a 3330  5.26.27.28.29.30' + "\n"
-            '00000050: 0a                                       .' + "\n"
-    )
-    line_length = len('00000000: 310a 320a 330a 340a 350a 360a 370a 380a  1.2.3.4.5.6.7.8.' + "\n")
-    offset = line_length * start_line
-    return data[offset:]
+    data_lines = [
+        '00000000: 310a 320a 330a 340a 350a 360a 370a 380a  1.2.3.4.5.6.7.8.' + "\n",
+        '00000010: 390a 3130 0a31 310a 3132 0a31 330a 3134  9.10.11.12.13.14' + "\n",
+        '00000020: 0a31 350a 3136 0a31 370a 3138 0a31 390a  .15.16.17.18.19.' + "\n",
+        '00000030: 3230 0a32 310a 3232 0a32 330a 3234 0a32  20.21.22.23.24.2' + "\n",
+        '00000040: 350a 3236 0a32 370a 3238 0a32 390a 3330  5.26.27.28.29.30' + "\n",
+        '00000050: 0a                                       .' + "\n",
+    ]
+    data = "".join(data_lines[start_line:])
+    return data
 
 
 def prepare_buffer(lines):
@@ -185,4 +183,30 @@ class TestVimTests(TestCase):
                 app.run()
                 actual = out.getvalue()
         expected = "00000036: 3231 7374 204d 6179 2031 3939 36  21st May 1996\n"
+        self.assertEqual(expected, actual)
+
+    def test_7(self):
+        """Test 7: Print C include"""
+        indata = "TESTabcd09\n"
+        file1 = os.path.join(tempfile.gettempdir(), "XXDFile")
+        with open(file1, "wt") as fp:
+            fp.write(indata)
+
+        with StringIO() as out:
+            with stdout_redirected(out):
+                args = {
+                    "include": True,
+                    "infile": file1,
+                    "name": "XXDFile",
+                }
+                app = HexDumper(args)
+                app.run()
+                actual = out.getvalue()
+
+        expected = """\
+unsigned char XXDFile[] = {
+  0x54, 0x45, 0x53, 0x54, 0x61, 0x62, 0x63, 0x64, 0x30, 0x39, 0x0a
+};
+unsigned int XXDFile_len = 11;
+"""
         self.assertEqual(expected, actual)
