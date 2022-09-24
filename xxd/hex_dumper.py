@@ -432,9 +432,12 @@ class HexDumper:
         self.postscript: bool = args.get("postscript", False)
         self.reverse: bool = args.get("reverse", False)
         self.decimal: bool = args.get("decimal", False)
-        self.seek = args.get("seek", 0)
-        if type(self.seek) != int:
-            sys.stdout.flush()
+        if args.get("seek") is None:
+            args["seek"] = None
+        self.seek = args.get("seek", None)
+        if self.seek is None:
+            self.seek = 0
+        elif type(self.seek) != int:
             self.seek = int(self.seek, 0)
         self.uppercase: bool = args.get("uppercase", False)
         self.version: bool = args.get("version", False)
