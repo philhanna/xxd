@@ -152,6 +152,16 @@ class TestRun(TestCase):
         os.remove(file1)
         os.remove(file2)
 
+    def test_columns_too_great(self):
+        args = {
+            "cols": 2000,
+            "infile": os.path.join(project_root_dir, "testdata/short"),
+        }
+        with self.assertRaises(ValueError) as x:
+            app = HexDumper(args)
+        errmsg = str(x.exception)
+        self.assertIn("columns", errmsg)
+
     def test_include(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-i", "-l", "60", "-C", "testdata/short", file1]

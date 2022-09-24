@@ -362,7 +362,7 @@ class HexDumper:
                     raise ValueError(f"-c {attr_cols} is not a non-negative integer")
 
         if self.cols > COLS:
-            raise ValueError("Number of columns {self.cols} cannot be greater than {COLS}")
+            raise ValueError(f"Number of columns {self.cols} cannot be greater than {COLS}")
 
         self.EBCDIC: bool = args.get("EBCDIC", False)
 
