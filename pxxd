@@ -55,6 +55,6 @@ del args["skip"]
 try:
     xxd = HexDumper(args)
     xxd.run()
-except ValueError as e:
+except Exception as e:
     print(f"{e}")
 
