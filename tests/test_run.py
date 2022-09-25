@@ -5,7 +5,7 @@ import tempfile
 from io import StringIO
 from unittest import TestCase
 
-from tests import project_root_dir, test_data_dir, stdout_redirected, stdin_redirected
+from tests import project_root_dir, test_data_dir, stdout_redirected, stdin_redirected, stderr_redirected
 from xxd import HexDumper
 
 
@@ -402,3 +402,9 @@ class TestRun(TestCase):
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
         os.remove(file2)
+
+    def test_dont_show_traceback(self):
+        parms = ["./pxxd", "bogus"]
+        cp = subprocess.run(parms, cwd=project_root_dir, capture_output=True)
+        errmsg = str(cp.stdout.decode("utf-8"))
+        self.assertIn("No such file or directory", errmsg)
