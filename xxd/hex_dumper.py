@@ -477,4 +477,8 @@ class HexDumper:
                          in re.findall("[0-9a-fA-F]{2}", line)]
             for c in hex_pairs:
                 b = bytes([c])
-                self.fpout.write(b)
+                try:
+                    self.fpout.write(b)
+                except TypeError:
+                    ch = chr(c)
+                    self.fpout.write(ch)

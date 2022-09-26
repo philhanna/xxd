@@ -408,3 +408,47 @@ class TestRun(TestCase):
         cp = subprocess.run(parms, cwd=project_root_dir, capture_output=True)
         errmsg = str(cp.stdout.decode("utf-8"))
         self.assertIn("No such file or directory", errmsg)
+
+    def test_ps_reverse(self):
+        input_string = "4b52414d4552202d2052454d41524b0a"
+        s = "".join([
+            chr(int(input_string[i:i + 2], 16))
+            for i in range(0, len(input_string), 2)])
+        file1 = os.path.join(tempfile.gettempdir(), "file1")
+        with open(file1, "wb") as fp:
+            fp.write(s.encode("utf-8"))
+
+        file2 = os.path.join(tempfile.gettempdir(), "file2")
+        args = {
+            "reverse": True,
+            "postscript": True,
+            "infile": "testdata/shortline",
+            "outfile": file2,
+        }
+        save_cwd = os.getcwd()
+        os.chdir(project_root_dir)
+        app = HexDumper(args)
+        app.run()
+        os.chdir(save_cwd)
+
+        self.assertTrue(filecmp.cmp(file1, file2))
+        os.remove(file1)
+        os.remove(file2)
+
+    def test_ps_reverse_stdout(self):
+        input_string = "4b52414d4552202d2052454d41524b"
+        expected = "".join([
+            chr(int(input_string[i:i + 2], 16))
+            for i in range(0, len(input_string), 2)])
+        with StringIO(input_string) as fpin:
+            with stdin_redirected(fpin):
+                with StringIO() as fpout:
+                    with stdout_redirected(fpout):
+                        args = {
+                            "reverse": True,
+                            "postscript": True,
+                        }
+                        app = HexDumper(args)
+                        app.run()
+                        actual = fpout.getvalue()
+        self.assertEqual(expected, actual)
