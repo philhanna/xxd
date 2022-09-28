@@ -3,6 +3,7 @@ import os
 import subprocess
 import tempfile
 from io import StringIO
+import shlex
 from unittest import TestCase
 
 from tests import project_root_dir, test_data_dir, stdout_redirected, stdin_redirected, stderr_redirected
@@ -14,9 +15,7 @@ class TestRun(TestCase):
     def test_default(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE, check=True)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -32,19 +31,16 @@ class TestRun(TestCase):
 
     def test_l_100(self):
         parms = ["xxd", "-l", "100", "testdata/cut"]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
-        expected = str(cp.stdout, encoding="utf-8")
+        cp = subprocess.run(parms, cwd=project_root_dir, check=True, text=True, stdout=subprocess.PIPE)
+        expected = cp.stdout
 
         args = {
             "len": 100,
             "infile": os.path.join(project_root_dir, "testdata/cut")
         }
         app = HexDumper(args)
-        with StringIO() as out:
-            with stdout_redirected(out):
-                app.run()
+        with StringIO() as out, stdout_redirected(out):
+            app.run()
             actual = out.getvalue()
 
         self.assertEqual(expected, actual)
@@ -52,9 +48,11 @@ class TestRun(TestCase):
     def test_o_x20(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-l", "100", "-o", "0x20", "testdata/cut", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -73,9 +71,11 @@ class TestRun(TestCase):
     def test_binary(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-b", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -93,9 +93,11 @@ class TestRun(TestCase):
     def test_columns_default(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -112,9 +114,11 @@ class TestRun(TestCase):
     def test_columns_10(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-u", "-d", "-c", "10", "-o", "0x100", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -135,9 +139,11 @@ class TestRun(TestCase):
     def test_columns_20(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-c", "20", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -158,16 +164,18 @@ class TestRun(TestCase):
             "infile": os.path.join(project_root_dir, "testdata/short"),
         }
         with self.assertRaises(ValueError) as x:
-            app = HexDumper(args)
+            HexDumper(args)
         errmsg = str(x.exception)
         self.assertIn("columns", errmsg)
 
     def test_include(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-i", "-l", "60", "-C", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -194,9 +202,11 @@ class TestRun(TestCase):
     def test_ebcdic(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-E", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -221,9 +231,11 @@ class TestRun(TestCase):
     def test_postscript(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-ps", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -248,9 +260,11 @@ class TestRun(TestCase):
     def test_name(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-i", "-n", "3om", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -303,9 +317,11 @@ class TestRun(TestCase):
     def test_autoskip_mixed(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-a", "testdata/mixedzero", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -330,9 +346,11 @@ class TestRun(TestCase):
     def test_seek(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-s", "0x20", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -354,9 +372,11 @@ class TestRun(TestCase):
     def test_seek_past_end(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-s", "0x100", "testdata/short", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -379,25 +399,24 @@ class TestRun(TestCase):
         """ Unit test with --seek and stdin"""
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-s", "0x01", "-", file1]
-        cp = subprocess.run(parms,
-                            cwd=project_root_dir,
-                            input="abcdefg".encode("utf-8"),
-                            stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       input="abcdefg",
+                       stdout=subprocess.PIPE)
 
-        with StringIO("abcdefg") as fpin:
-            with stdin_redirected(fpin):
-                file2 = os.path.join(tempfile.gettempdir(), "file2")
-                args = {
-                    "seek": "0x01",
-                    "outfile": file2
-                }
-                save_cwd = os.getcwd()
-                os.chdir(project_root_dir)
-                app = HexDumper(args)
-                app.run()
-                os.chdir(save_cwd)
+        with StringIO("abcdefg") as fpin, stdin_redirected(fpin):
+            file2 = os.path.join(tempfile.gettempdir(), "file2")
+            args = {
+                "seek": "0x01",
+                "outfile": file2
+            }
+            save_cwd = os.getcwd()
+            os.chdir(project_root_dir)
+            app = HexDumper(args)
+            app.run()
+            os.chdir(save_cwd)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -405,15 +424,16 @@ class TestRun(TestCase):
 
     def test_dont_show_traceback(self):
         parms = ["./pxxd", "bogus"]
-        cp = subprocess.run(parms, cwd=project_root_dir, capture_output=True)
-        errmsg = str(cp.stdout.decode("utf-8"))
+        cp = subprocess.run(parms, cwd=project_root_dir, check=True, text=True, capture_output=True)
+        errmsg = cp.stdout
         self.assertIn("No such file or directory", errmsg)
 
     def test_ps_reverse(self):
         input_string = "4b52414d4552202d2052454d41524b0a"
-        s = "".join([
-            chr(int(input_string[i:i + 2], 16))
-            for i in range(0, len(input_string), 2)])
+        input_pairs = [input_string[i:i+2]
+                       for i in range(0, len(input_string), 2)]
+        input_chars = [chr(int(x, 16)) for x in input_pairs]
+        s = "".join(input_chars)
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         with open(file1, "wb") as fp:
             fp.write(s.encode("utf-8"))
@@ -437,18 +457,21 @@ class TestRun(TestCase):
 
     def test_ps_reverse_stdout(self):
         input_string = "4b52414d4552202d2052454d41524b"
-        expected = "".join([
-            chr(int(input_string[i:i + 2], 16))
-            for i in range(0, len(input_string), 2)])
-        with StringIO(input_string) as fpin:
-            with stdin_redirected(fpin):
-                with StringIO() as fpout:
-                    with stdout_redirected(fpout):
-                        args = {
-                            "reverse": True,
-                            "postscript": True,
-                        }
-                        app = HexDumper(args)
-                        app.run()
-                        actual = fpout.getvalue()
+        input_pairs = [input_string[i:i+2]
+                       for i in range(0, len(input_string), 2)]
+        input_chars = [chr(int(x, 16)) for x in input_pairs]
+        expected = "".join(input_chars)
+        with (
+            StringIO(input_string) as fpin,
+            stdin_redirected(fpin),
+            StringIO() as fpout,
+            stdout_redirected(fpout)
+        ):
+            args = {
+                "reverse": True,
+                "postscript": True,
+            }
+            app = HexDumper(args)
+            app.run()
+            actual = fpout.getvalue()
         self.assertEqual(expected, actual)
