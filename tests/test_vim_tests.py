@@ -4,7 +4,7 @@ import tempfile
 from io import BytesIO, StringIO
 from unittest import TestCase
 
-from tests import stdout_redirected, stdin_redirected, project_root_dir, test_data_dir
+from tests import stdout_redirected, stdin_redirected, project_root_dir, testdata
 from xxd import HexDumper
 
 
@@ -149,7 +149,7 @@ class TestVimTests(TestCase):
 
     def test5(self):
         """Test 5: Print 120 bytes as continuous hexdump with 20 octets per line"""
-        infile = os.path.join(test_data_dir, "xxd.1")
+        infile = os.path.join(testdata, "xxd.1")
         with StringIO() as fp:
             with stdout_redirected(fp):
                 args = {
@@ -170,7 +170,7 @@ class TestVimTests(TestCase):
 
     def test_6(self):
         """Test 6: Print the date from xxd.1"""
-        infile = os.path.join(test_data_dir, "xxd.1")
+        infile = os.path.join(testdata, "xxd.1")
         with StringIO() as out:
             with stdout_redirected(out):
                 args = {

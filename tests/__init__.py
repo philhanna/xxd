@@ -8,7 +8,7 @@ from tests.savedir import SaveDirectory
 
 my_dir = os.path.dirname(__file__)
 project_root_dir = os.path.abspath(os.path.join(my_dir, ".."))
-test_data_dir = os.path.join(project_root_dir, "testdata")
+testdata = os.path.join(project_root_dir, "testdata")
 
 
 # redirect stdout technique from https://www.python.org/dev/peps/pep-0343/
@@ -46,7 +46,7 @@ def stdin_redirected(new_stdin):
 __all__ = [
     'SaveDirectory',
     'project_root_dir',
-    'test_data_dir',
+    'testdata',
     'stdout_redirected',
     'stderr_redirected',
     'stdin_redirected',

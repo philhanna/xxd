@@ -3,20 +3,26 @@ import os
 import subprocess
 import tempfile
 from io import StringIO
-import shlex
 from unittest import TestCase
 
-from tests import project_root_dir, test_data_dir, stdout_redirected, stdin_redirected, stderr_redirected, \
-    SaveDirectory
+from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDirectory
 from xxd import HexDumper
 
 
 class TestRun(TestCase):
 
+    @staticmethod
+    def runxxd(parms) -> subprocess.CompletedProcess:
+        return subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       stdout=subprocess.PIPE)
+
     def test_default(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "testdata/short", file1]
-        subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE, check=True)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -32,7 +38,7 @@ class TestRun(TestCase):
 
     def test_l_100(self):
         parms = ["xxd", "-l", "100", "testdata/cut"]
-        cp = subprocess.run(parms, cwd=project_root_dir, check=True, text=True, stdout=subprocess.PIPE)
+        cp = self.runxxd(parms)
         expected = cp.stdout
 
         args = {
@@ -49,11 +55,7 @@ class TestRun(TestCase):
     def test_o_x20(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-l", "100", "-o", "0x20", "testdata/cut", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -72,11 +74,7 @@ class TestRun(TestCase):
     def test_binary(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-b", "testdata/short", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -94,11 +92,7 @@ class TestRun(TestCase):
     def test_columns_default(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "testdata/short", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -115,11 +109,7 @@ class TestRun(TestCase):
     def test_columns_10(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-u", "-d", "-c", "10", "-o", "0x100", "testdata/short", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -140,11 +130,7 @@ class TestRun(TestCase):
     def test_columns_20(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-c", "20", "testdata/short", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -172,11 +158,7 @@ class TestRun(TestCase):
     def test_include(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-i", "-l", "60", "-C", "testdata/short", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -202,11 +184,7 @@ class TestRun(TestCase):
     def test_ebcdic(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-E", "testdata/short", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -230,11 +208,7 @@ class TestRun(TestCase):
     def test_postscript(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-ps", "testdata/short", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -258,11 +232,7 @@ class TestRun(TestCase):
     def test_name(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-i", "-n", "3om", "testdata/short", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -287,9 +257,7 @@ class TestRun(TestCase):
     def test_autoskip_allzero(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-a", "testdata/allzero", file1]
-        cp = subprocess.run(parms, cwd=project_root_dir, stdout=subprocess.PIPE)
-        if cp.returncode != 0:
-            raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -313,11 +281,7 @@ class TestRun(TestCase):
     def test_autoskip_mixed(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-a", "testdata/mixedzero", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -338,11 +302,7 @@ class TestRun(TestCase):
     def test_seek(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-s", "0x20", "testdata/short", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -363,11 +323,7 @@ class TestRun(TestCase):
     def test_seek_past_end(self):
         file1 = os.path.join(tempfile.gettempdir(), "file1")
         parms = ["xxd", "-s", "0x100", "testdata/short", file1]
-        subprocess.run(parms,
-                       cwd=project_root_dir,
-                       check=True,
-                       text=True,
-                       stdout=subprocess.PIPE)
+        self.runxxd(parms)
 
         file2 = os.path.join(tempfile.gettempdir(), "file2")
         args = {
@@ -393,19 +349,21 @@ class TestRun(TestCase):
                        check=True,
                        text=True,
                        input="abcdefg",
-                       stdout=subprocess.PIPE)
+                       capture_output=True)
 
-        with StringIO("abcdefg") as fpin, stdin_redirected(fpin):
+        with (
+            StringIO("abcdefg") as fpin,
+            stdin_redirected(fpin),
+            SaveDirectory()
+        ):
             file2 = os.path.join(tempfile.gettempdir(), "file2")
             args = {
                 "seek": "0x01",
                 "outfile": file2
             }
-            save_cwd = os.getcwd()
             os.chdir(project_root_dir)
             app = HexDumper(args)
             app.run()
-            os.chdir(save_cwd)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -413,7 +371,7 @@ class TestRun(TestCase):
 
     def test_dont_show_traceback(self):
         parms = ["./pxxd", "bogus"]
-        cp = subprocess.run(parms, cwd=project_root_dir, check=True, text=True, capture_output=True)
+        cp = self.runxxd(parms)
         errmsg = cp.stdout
         self.assertIn("No such file or directory", errmsg)
 
