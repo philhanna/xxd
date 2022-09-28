@@ -7,6 +7,16 @@ from unittest import TestCase
 from tests import stdout_redirected, stdin_redirected, project_root_dir, testdata
 from xxd import HexDumper
 
+tmp = tempfile.gettempdir()
+
+
+def runxxd(parms) -> subprocess.CompletedProcess:
+    return subprocess.run(parms,
+                          cwd=project_root_dir,
+                          check=True,
+                          text=True,
+                          capture_output=True)
+
 
 def get_test_list():
     """Returns the test data list"""
@@ -41,14 +51,14 @@ class TestVimTests(TestCase):
         """Test_1: simple, filter the result through xxd"""
         indata = get_test_list()
         bindata = prepare_buffer(indata)
-        with BytesIO(bindata) as infile:
-            with stdin_redirected(infile):
-                with BytesIO() as outfile:
-                    with stdout_redirected(outfile):
-                        args = {}
-                        app = HexDumper(args)
-                        app.run()
-                        actual = outfile.getvalue()
+        with (BytesIO(bindata) as infile,
+              stdin_redirected(infile),
+              BytesIO() as outfile,
+              stdout_redirected(outfile)):
+            args = {}
+            app = HexDumper(args)
+            app.run()
+            actual = outfile.getvalue()
         expected = prepare_buffer(get_xxd_of_test_list())
         self.assertEqual(expected, actual)
 
@@ -56,16 +66,14 @@ class TestVimTests(TestCase):
         """Test 2: reverse the result"""
         indata = get_xxd_of_test_list()
         bindata = prepare_buffer(indata)
-        with BytesIO(bindata) as infile:
-            with stdin_redirected(infile):
-                with BytesIO() as outfile:
-                    with stdout_redirected(outfile):
-                        args = {
-                            "reverse": True
-                        }
-                        app = HexDumper(args)
-                        app.run()
-                        actual = outfile.getvalue()
+        with (BytesIO(bindata) as infile,
+              stdin_redirected(infile),
+              BytesIO() as outfile,
+              stdout_redirected(outfile)):
+            args = {"reverse": True}
+            app = HexDumper(args)
+            app.run()
+            actual = outfile.getvalue()
         expected = prepare_buffer(get_test_list())
         self.assertEqual(expected, actual)
 
@@ -73,13 +81,13 @@ class TestVimTests(TestCase):
         """Test 3: Skip the first 0x30 bytes"""
 
         # Create the input file, a list of numbers from 1 to 30
-        _, testdata = tempfile.mkstemp()
+        testdata = os.path.join(tmp, "testdata")
         with open(testdata, "wt") as fp:
             fp.write(get_test_list())
 
         # Create the expected output file
         expected = get_xxd_of_test_list(start_line=3)
-        _, expected_file = tempfile.mkstemp()
+        expected_file = os.path.join(tmp, "expected_file")
         with open(expected_file, "wt") as fp:
             fp.write(expected)
 
@@ -90,7 +98,8 @@ class TestVimTests(TestCase):
             for token in arg.split():
                 parms.append(token)
             parms.append(testdata)
-            _, outfile = tempfile.mkstemp()
+
+            outfile = os.path.join(tmp, "outfile")
             parms.append(outfile)
 
             # At this point, the "parms" list should consist of:
@@ -100,9 +109,7 @@ class TestVimTests(TestCase):
             #   The output file name (outfile)
 
             # Run the command
-            cp = subprocess.run(parms, cwd=project_root_dir)
-            if cp.returncode != 0:
-                raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+            runxxd(parms)
 
             # Compare the results
             self.assertTrue(testdata, outfile)
@@ -115,14 +122,14 @@ class TestVimTests(TestCase):
         """TTest 4: Skip the first 30 bytes"""
 
         # Create the input file, a list of numbers from 1 to 30
-        _, testdata = tempfile.mkstemp()
+        testdata = os.path.join(tmp, "testdata")
         with open(testdata, "wt") as fp:
             fp.write(get_test_list())
 
         # Create the expected output file
         expected = "00000031: 300a 3231 0a32 320a 3233 0a32 340a 3235  0.21.22.23.24.25\n" \
                    + "00000041: 0a32 360a 3237 0a32 380a 3239 0a33 300a  .26.27.28.29.30."
-        _, expected_file = tempfile.mkstemp()
+        expected_file = os.path.join(tmp, "expected_file")
         with open(expected_file, "wt") as fp:
             fp.write(expected)
 
@@ -132,13 +139,12 @@ class TestVimTests(TestCase):
             for token in arg.split():
                 parms.append(token)
             parms.append(testdata)
-            _, outfile = tempfile.mkstemp()
+
+            outfile = os.path.join(tmp, "outfile")
             parms.append(outfile)
 
             # Run the command
-            cp = subprocess.run(parms, cwd=project_root_dir)
-            if cp.returncode != 0:
-                raise RuntimeError(f"Bad return code {cp.returncode} from running {parms[0]}")
+            runxxd(parms)
 
             # Compare the results
             self.assertTrue(testdata, outfile)
@@ -150,19 +156,18 @@ class TestVimTests(TestCase):
     def test5(self):
         """Test 5: Print 120 bytes as continuous hexdump with 20 octets per line"""
         infile = os.path.join(testdata, "xxd.1")
-        with StringIO() as fp:
-            with stdout_redirected(fp):
-                args = {
-                    "postscript": True,
-                    "len": 120,
-                    "cols": 20,
-                    "infile": infile
-                }
-                app = HexDumper(args)
-                app.run()
-                actual = fp.getvalue()
+        with StringIO() as fp, stdout_redirected(fp):
+            args = {
+                "postscript": True,
+                "len": 120,
+                "cols": 20,
+                "infile": infile
+            }
+            app = HexDumper(args)
+            app.run()
+            actual = fp.getvalue()
 
-        filename = os.path.join(os.path.join(project_root_dir, 'testdata'), "man_copy.ps.expected")
+        filename = os.path.join(testdata, "man_copy.ps.expected")
         with open(filename, "rt") as fp:
             expected = fp.read()
 
@@ -188,20 +193,19 @@ class TestVimTests(TestCase):
     def test_7(self):
         """Test 7: Print C include"""
         indata = "TESTabcd09\n"
-        file1 = os.path.join(tempfile.gettempdir(), "XXDFile")
+        file1 = os.path.join(tmp, "XXDFile")
         with open(file1, "wt") as fp:
             fp.write(indata)
 
-        with StringIO() as out:
-            with stdout_redirected(out):
-                args = {
-                    "include": True,
-                    "infile": file1,
-                    "name": "XXDFile",
-                }
-                app = HexDumper(args)
-                app.run()
-                actual = out.getvalue()
+        with StringIO() as out, stdout_redirected(out):
+            args = {
+                "include": True,
+                "infile": file1,
+                "name": "XXDFile",
+            }
+            app = HexDumper(args)
+            app.run()
+            actual = out.getvalue()
 
         expected = """\
 unsigned char XXDFile[] = {
@@ -210,25 +214,25 @@ unsigned char XXDFile[] = {
 unsigned int XXDFile_len = 11;
 """
         self.assertEqual(expected, actual)
+        os.remove(file1)
 
     def test_8(self):
         """Test 8: Print C include capitalized"""
         indata = "TESTabcd09\n"
-        file1 = os.path.join(tempfile.gettempdir(), "XXDFile")
+        file1 = os.path.join(tmp, "XXDFile")
         with open(file1, "wt") as fp:
             fp.write(indata)
 
-        with StringIO() as out:
-            with stdout_redirected(out):
-                args = {
-                    "include": True,
-                    "infile": file1,
-                    "capitalize": True,
-                    "name": "XXDFile",
-                }
-                app = HexDumper(args)
-                app.run()
-                actual = out.getvalue()
+        with StringIO() as out, stdout_redirected(out):
+            args = {
+                "include": True,
+                "infile": file1,
+                "capitalize": True,
+                "name": "XXDFile",
+            }
+            app = HexDumper(args)
+            app.run()
+            actual = out.getvalue()
 
         expected = """\
 unsigned char XXDFILE[] = {
