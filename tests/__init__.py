@@ -4,6 +4,8 @@ import sys
 
 from contextlib import contextmanager
 
+from tests.savedir import SaveDirectory
+
 my_dir = os.path.dirname(__file__)
 project_root_dir = os.path.abspath(os.path.join(my_dir, ".."))
 test_data_dir = os.path.join(project_root_dir, "testdata")
@@ -42,6 +44,7 @@ def stdin_redirected(new_stdin):
 
 
 __all__ = [
+    'SaveDirectory',
     'project_root_dir',
     'test_data_dir',
     'stdout_redirected',

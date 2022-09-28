@@ -6,7 +6,8 @@ from io import StringIO
 import shlex
 from unittest import TestCase
 
-from tests import project_root_dir, test_data_dir, stdout_redirected, stdin_redirected, stderr_redirected
+from tests import project_root_dir, test_data_dir, stdout_redirected, stdin_redirected, stderr_redirected, \
+    SaveDirectory
 from xxd import HexDumper
 
 
@@ -189,11 +190,10 @@ class TestRun(TestCase):
         # Need to chdir so that the input file is found.
         # I can't specify a full path because that's what is used
         # to form the varname of the include file
-        save_cwd = os.getcwd()
-        os.chdir(project_root_dir)
-        app = HexDumper(args)
-        app.run()
-        os.chdir(save_cwd)
+        with SaveDirectory():
+            os.chdir(project_root_dir)
+            app = HexDumper(args)
+            app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -218,11 +218,10 @@ class TestRun(TestCase):
         # Need to chdir so that the input file is found.
         # I can't specify a full path because that's what is used
         # to form the varname of the include file
-        save_cwd = os.getcwd()
-        os.chdir(project_root_dir)
-        app = HexDumper(args)
-        app.run()
-        os.chdir(save_cwd)
+        with SaveDirectory():
+            os.chdir(project_root_dir)
+            app = HexDumper(args)
+            app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -247,11 +246,10 @@ class TestRun(TestCase):
         # Need to chdir so that the input file is found.
         # I can't specify a full path because that's what is used
         # to form the varname of the include file
-        save_cwd = os.getcwd()
-        os.chdir(project_root_dir)
-        app = HexDumper(args)
-        app.run()
-        os.chdir(save_cwd)
+        with SaveDirectory():
+            os.chdir(project_root_dir)
+            app = HexDumper(args)
+            app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -277,11 +275,10 @@ class TestRun(TestCase):
         # Need to chdir so that the input file is found.
         # I can't specify a full path because that's what is used
         # to form the varname of the include file
-        save_cwd = os.getcwd()
-        os.chdir(project_root_dir)
-        app = HexDumper(args)
-        app.run()
-        os.chdir(save_cwd)
+        with SaveDirectory():
+            os.chdir(project_root_dir)
+            app = HexDumper(args)
+            app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -304,11 +301,10 @@ class TestRun(TestCase):
         # Need to chdir so that the input file is found.
         # I can't specify a full path because that's what is used
         # to form the varname of the include file
-        save_cwd = os.getcwd()
-        os.chdir(project_root_dir)
-        app = HexDumper(args)
-        app.run()
-        os.chdir(save_cwd)
+        with SaveDirectory():
+            os.chdir(project_root_dir)
+            app = HexDumper(args)
+            app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -330,14 +326,10 @@ class TestRun(TestCase):
             "outfile": file2
         }
 
-        # Need to chdir so that the input file is found.
-        # I can't specify a full path because that's what is used
-        # to form the varname of the include file
-        save_cwd = os.getcwd()
-        os.chdir(project_root_dir)
-        app = HexDumper(args)
-        app.run()
-        os.chdir(save_cwd)
+        with SaveDirectory():
+            os.chdir(project_root_dir)
+            app = HexDumper(args)
+            app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -359,11 +351,10 @@ class TestRun(TestCase):
             "outfile": file2
         }
 
-        save_cwd = os.getcwd()
-        os.chdir(project_root_dir)
-        app = HexDumper(args)
-        app.run()
-        os.chdir(save_cwd)
+        with SaveDirectory():
+            os.chdir(project_root_dir)
+            app = HexDumper(args)
+            app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -384,12 +375,10 @@ class TestRun(TestCase):
             "infile": "testdata/short",
             "outfile": file2
         }
-
-        save_cwd = os.getcwd()
-        os.chdir(project_root_dir)
-        app = HexDumper(args)
-        app.run()
-        os.chdir(save_cwd)
+        with SaveDirectory():
+            os.chdir(project_root_dir)
+            app = HexDumper(args)
+            app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -445,11 +434,10 @@ class TestRun(TestCase):
             "infile": "testdata/shortline",
             "outfile": file2,
         }
-        save_cwd = os.getcwd()
-        os.chdir(project_root_dir)
-        app = HexDumper(args)
-        app.run()
-        os.chdir(save_cwd)
+        with SaveDirectory():
+            os.chdir(project_root_dir)
+            app = HexDumper(args)
+            app.run()
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
