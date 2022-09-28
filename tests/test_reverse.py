@@ -4,36 +4,38 @@ import subprocess
 import tempfile
 from unittest import TestCase, skip
 
-from tests import project_root_dir
+from tests import project_root_dir, SaveDirectory
 from xxd import HexDumper
+
+tmp = tempfile.gettempdir()
+
+
+def runxxd(parms) -> subprocess.CompletedProcess:
+    return subprocess.run(parms,
+                          cwd=project_root_dir,
+                          check=True,
+                          text=True,
+                          capture_output=True)
 
 
 class TestReverse(TestCase):
 
     def test_reverse(self):
         # Create the temporary output file for xxd
-        _, infile = tempfile.mkstemp()
+        infile = os.path.join(tmp, "infile")
         indata = "Now is the time for all good men to come to the aid of their party.\n"
         with open(infile, "wt") as fp:
             fp.write(indata)
 
         # Run xxd on the file
-        _, file1 = tempfile.mkstemp()
-        save_cwd = os.getcwd()
-        try:
+        file1 = os.path.join(tmp, "file1")
+        with SaveDirectory():
             os.chdir(project_root_dir)
-            parms = [
-                "xxd",
-                infile,
-                file1
-            ]
-            cp = subprocess.run(parms, stdout=subprocess.PIPE)
-            if cp.returncode != 0:
-                errmsg = f"Bad return code {cp.returncode} from running {parms[0]}"
-                raise RuntimeError(errmsg)
+            parms = ["xxd", infile, file1]
+            runxxd(parms)
 
             # Now run pxxd to reverse the file transformation
-            _, file2 = tempfile.mkstemp()
+            file2 = os.path.join(tmp, "file2")
             args = {
                 "reverse": True,
                 "infile": file1,
@@ -41,8 +43,6 @@ class TestReverse(TestCase):
             }
             app = HexDumper(args)
             app.run()
-        finally:
-            os.chdir(save_cwd)
 
         # Are the files identical?
         self.assertTrue(filecmp.cmp(infile, file2))
@@ -53,28 +53,24 @@ class TestReverse(TestCase):
 
     def test_reverse_with_seek(self):
         # Create the temporary output file for xxd
-        _, infile = tempfile.mkstemp()
+        infile = os.path.join(tmp, "infile")
         indata = "Now is the time for all good men to come to the aid of their party.\n"
         with open(infile, "wt") as fp:
             fp.write(indata)
 
         # Run xxd on the file
-        _, file1 = tempfile.mkstemp()
-        save_cwd = os.getcwd()
-        try:
+        with SaveDirectory():
+            file1 = os.path.join(tmp, "file1")
             os.chdir(project_root_dir)
             parms = [
                 "xxd",
                 infile,
                 file1
             ]
-            cp = subprocess.run(parms, stdout=subprocess.PIPE)
-            if cp.returncode != 0:
-                errmsg = f"Bad return code {cp.returncode} from running {parms[0]}"
-                raise RuntimeError(errmsg)
+            runxxd(parms)
 
             # Now run pxxd to reverse the file transformation
-            _, file2 = tempfile.mkstemp()
+            file2 = os.path.join(tmp, "file2")
             args = {
                 "reverse": True,
                 "seek": 4,
@@ -83,8 +79,6 @@ class TestReverse(TestCase):
             }
             app = HexDumper(args)
             app.run()
-        finally:
-            os.chdir(save_cwd)
 
         # Are the files identical?
         file1bytes = b'\x00\x00\x00\x00' + indata.encode("utf-8")
@@ -98,29 +92,25 @@ class TestReverse(TestCase):
 
     def test_reverse_ps(self):
         # Create the temporary output file for xxd
-        _, infile = tempfile.mkstemp()
+        infile = os.path.join(tmp, "infile")
         indata = "Now is the time for all good men to come to the aid of their party.\n"
         with open(infile, "wt") as fp:
             fp.write(indata)
 
         # Run xxd on the file
-        _, file1 = tempfile.mkstemp()
-        save_cwd = os.getcwd()
-        try:
+        with SaveDirectory():
             os.chdir(project_root_dir)
+            file1 = os.path.join(tmp, "file1")
             parms = [
                 "xxd",
                 "-ps",
                 infile,
                 file1
             ]
-            cp = subprocess.run(parms, stdout=subprocess.PIPE)
-            if cp.returncode != 0:
-                errmsg = f"Bad return code {cp.returncode} from running {parms[0]}"
-                raise RuntimeError(errmsg)
+            runxxd(parms)
 
             # Now run pxxd to reverse the file transformation
-            _, file2 = tempfile.mkstemp()
+            file2 = os.path.join(tmp, "file2")
             args = {
                 "reverse": True,
                 "postscript": True,
@@ -129,8 +119,6 @@ class TestReverse(TestCase):
             }
             app = HexDumper(args)
             app.run()
-        finally:
-            os.chdir(save_cwd)
 
         # Are the files identical?
         self.assertTrue(filecmp.cmp(infile, file2))
@@ -141,29 +129,25 @@ class TestReverse(TestCase):
 
     def test_reverse_ps_with_seek(self):
         # Create the temporary output file for xxd
-        _, infile = tempfile.mkstemp()
+        infile = os.path.join(tmp, "infile")
         indata = "Now is the time for all good men to come to the aid of their party.\n"
         with open(infile, "wt") as fp:
             fp.write(indata)
 
         # Run xxd on the file
-        _, file1 = tempfile.mkstemp()
-        save_cwd = os.getcwd()
-        try:
+        with SaveDirectory():
             os.chdir(project_root_dir)
+            file1 = os.path.join(tmp, "file1")
             parms = [
                 "xxd",
                 "-ps",
                 infile,
                 file1
             ]
-            cp = subprocess.run(parms, stdout=subprocess.PIPE)
-            if cp.returncode != 0:
-                errmsg = f"Bad return code {cp.returncode} from running {parms[0]}"
-                raise RuntimeError(errmsg)
+            runxxd(parms)
 
             # Now run pxxd to reverse the file transformation
-            _, file2 = tempfile.mkstemp()
+            file2 = os.path.join(tmp, "file2")
             args = {
                 "reverse": True,
                 "postscript": True,
@@ -173,8 +157,6 @@ class TestReverse(TestCase):
             }
             app = HexDumper(args)
             app.run()
-        finally:
-            os.chdir(save_cwd)
 
         # Are the files identical?
         file1bytes = b'\x00\x00\x00\x00' + indata.encode("utf-8")
