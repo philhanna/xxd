@@ -97,7 +97,6 @@ class Dumper(ABC):
             for other in ["postscript", "include", "reverse"]:
                 if other in args.keys() and args[other]:
                     raise ValueError("-b option is incompatible with -ps, -i, or -r.")
-            self.hextype = HexType.HEX_BITS
         return binary
 
     def set_columns(self, args) -> int:
