@@ -14,39 +14,36 @@ class Dumper(ABC):
         Note that defaults are implemented here by the dictionary 'get(key, default)' approach.
         Incompatible options raise a ValueError.
         """
-        args = args if args else {}
-        self.args = args
+        self.args = args if args else {}
 
-        self.reverse = None
-        self.outfile = None
-        self.infile = None
-        self.pname: str = sys.argv[0].split("/")[-1]
-        self.fpin = None
-        self.fpout = None
-        self.so_far = None
-        self.file_offset = None
+        # Remaining members are initialized here in alphabetic order.
+        # There should be no dependencies on order
         self.autoskip: bool = args.get("autoskip", False)
         self.autoskip_lines = None
         self.autoskip_state = None
-        self.hextype = HexType.HEX_NORMAL
         self.binary: bool = self.set_binary(args)
         self.capitalize: bool = args.get("capitalize", False)
         self.cols = self.set_columns(args)
+        self.decimal: bool = args.get("decimal", False)
         self.EBCDIC: bool = args.get("EBCDIC", False)
-        self.little_endian: bool = self.set_little_endian(args)
+        self.file_offset = None
+        self.fpin = None
+        self.fpout = None
+        self.hextype = self.set_hextype(args)
         self.include: bool = args.get("include", False)
+        self.infile = self.set_infile(args)
         self.length = self.set_length(args)
+        self.little_endian: bool = self.set_little_endian(args)
         self.name: str = args.get("name", None)
         self.octets_per_group = self.set_octets_per_group(args)
         self.offset = self.set_offset(args)
+        self.outfile: str = args.get("outfile", None)
         self.postscript: bool = args.get("postscript", False)
         self.reverse: bool = args.get("reverse", False)
-        self.decimal: bool = args.get("decimal", False)
         self.seek = self.set_seek(args)
+        self.so_far = None
         self.uppercase: bool = args.get("uppercase", False)
         self.version: bool = args.get("version", False)
-        self.infile = self.set_infile(args)
-        self.outfile: str = args.get("outfile", None)
 
     def data_format(self, b):
         result = None
@@ -121,11 +118,24 @@ class Dumper(ABC):
             raise ValueError(f"Number of columns {cols} cannot be greater than {COLS}")
         return cols
 
+    def set_hextype(self, args):
+        hextype = HexType.HEX_NORMAL
+        if "postscript" in args:
+            hextype = HexType.HEX_POSTSCRIPT
+        elif "include" in args:
+            hextype = HexType.HEX_CINCLUDE
+        elif "binary" in args:
+            hextype = HexType.HEX_BITS
+        elif "litte_endian" in args:
+            hextype = HexType.HEX_LITTLEENDIAN
+        return hextype
+
     def set_infile(self, args):
         infile: str = args.get("infile", None)
         if infile and not infile == '-':
             if not os.path.exists(infile):
-                raise RuntimeError(f"{self.pname}: {infile}: No such file or directory")
+                pname = os.path.basename(sys.argv[0])
+                raise RuntimeError(f"{pname}: {infile}: No such file or directory")
         return infile
 
     def set_length(self, args):

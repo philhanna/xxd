@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 
 from xxd import HexDumper, CDumper, PostscriptDumper
 
@@ -196,10 +196,6 @@ class TestXXDOptions(TestCase):
     def test_outfile(self):
         xxd = HexDumper({})
         self.assertIsNone(xxd.outfile)
-
-    def test_pname(self):
-        xxd = HexDumper({})
-        self.assertIsNotNone(xxd.pname)
 
     def test_postscript(self):
         xxd = HexDumper({"postscript": True})
