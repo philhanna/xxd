@@ -34,15 +34,7 @@ class Dumper(ABC):
         self.capitalize: bool = args.get("capitalize", False)
         self.cols = self.set_columns(args)
         self.EBCDIC: bool = args.get("EBCDIC", False)
-
-        # Little endian option is incompatible with -ps, -i, or -r
-        self.little_endian: bool = args.get("little_endian", False)
-        if self.little_endian:
-            for other in ["postscript", "include", "reverse"]:
-                if other in args.keys():
-                    raise ValueError("-e option is incompatible with -ps, -i, or -r.")
-
-        # C-style includes
+        self.little_endian: bool = self.set_little_endian(args)
         self.include = args.get("include", False)
 
         # Octets per group option has different defaults depending on other -e has been specified
@@ -116,6 +108,15 @@ class Dumper(ABC):
             if not os.path.exists(self.infile):
                 raise RuntimeError(f"{self.pname}: {self.infile}: No such file or directory")
         self.outfile: str = args.get("outfile", None)
+
+    def set_little_endian(self, args):
+        """Little endian option is incompatible with -ps, -i, or -r"""
+        little_endian: bool = args.get("little_endian", False)
+        if little_endian:
+            for other in ["postscript", "include", "reverse"]:
+                if other in args.keys():
+                    raise ValueError("-e option is incompatible with -ps, -i, or -r.")
+        return little_endian
 
     def set_binary(self, args) -> bool:
         """Binary option is incompatible with -ps, -i, or -r"""
