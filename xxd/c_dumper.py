@@ -83,7 +83,7 @@ class CDumper(Dumper):
         self.fpout.flush()
 
     def mainline_reverse(self):
-        super().mainline_reverse()
+        raise RuntimeError("-r option is not supported for C include files")
 
     @staticmethod
     def convert_to_valid_c_variable_name(varname):
