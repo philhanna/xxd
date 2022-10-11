@@ -9,6 +9,9 @@ class CDumper(Dumper):
     def __init__(self, args):
         super().__init__(args)
 
+    def get_default_columns(self) -> int:
+        return 12
+
     def mainline(self):
         super().mainline()  # Important!
 

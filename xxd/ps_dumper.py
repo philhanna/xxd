@@ -6,6 +6,9 @@ from xxd import Dumper
 class PostscriptDumper(Dumper):
     """Works with postscript format"""
 
+    def get_default_columns(self) -> int:
+        return 30
+
     def __init__(self, args):
         super().__init__(args)
 
