@@ -1,14 +1,11 @@
 import filecmp
 import os
 import subprocess
-import tempfile
 from io import StringIO
 from unittest import TestCase
 
-from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDirectory
+from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDirectory, tmp
 from xxd import HexDumper
-
-tmp = tempfile.gettempdir()
 
 
 def runxxd(parms) -> subprocess.CompletedProcess:

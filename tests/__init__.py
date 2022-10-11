@@ -1,7 +1,7 @@
 """Unit tests"""
 import os.path
 import sys
-
+import tempfile
 from contextlib import contextmanager
 
 from tests.savedir import SaveDirectory
@@ -9,6 +9,7 @@ from tests.savedir import SaveDirectory
 my_dir = os.path.dirname(__file__)
 project_root_dir = os.path.abspath(os.path.join(my_dir, ".."))
 testdata = os.path.join(project_root_dir, "testdata")
+tmp = tempfile.gettempdir()
 
 
 # redirect stdout technique from https://www.python.org/dev/peps/pep-0343/
@@ -44,6 +45,7 @@ def stdin_redirected(new_stdin):
 
 
 __all__ = [
+    'tmp',
     'SaveDirectory',
     'project_root_dir',
     'testdata',

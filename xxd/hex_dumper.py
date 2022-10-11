@@ -1,7 +1,6 @@
 import os.path
 import re
 import string
-from io import UnsupportedOperation
 
 from xxd import HexType, COLS, ebcdic_table, Dumper
 

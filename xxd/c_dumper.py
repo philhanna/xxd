@@ -12,5 +12,3 @@ class CDumper(Dumper):
 
     def mainline_reverse(self):
         super().mainline_reverse()
-
-
