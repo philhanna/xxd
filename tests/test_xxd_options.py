@@ -5,10 +5,6 @@ from xxd import HexDumper, CDumper, PostscriptDumper
 
 class TestXXDOptions(TestCase):
 
-    def test_pname(self):
-        xxd = HexDumper({})
-        self.assertIsNotNone(xxd.pname)
-
     def test_autoskip_default(self):
         xxd = HexDumper({})
         self.assertFalse(xxd.autoskip)
@@ -17,16 +13,16 @@ class TestXXDOptions(TestCase):
         xxd = HexDumper({"autoskip": True})
         self.assertTrue(xxd.autoskip)
 
+    def test_binary_conflict_include(self):
+        with self.assertRaises(ValueError) as err:
+            HexDumper({"binary": True, "include": True})
+        errmsg = str(err.exception)
+        self.assertIn("incompatible", errmsg)
+
     # The -b option is incompatible with -ps, -i, or -r
     def test_binary_conflict_postscript(self):
         with self.assertRaises(ValueError) as err:
             HexDumper({"binary": True, "postscript": True})
-        errmsg = str(err.exception)
-        self.assertIn("incompatible", errmsg)
-
-    def test_binary_conflict_include(self):
-        with self.assertRaises(ValueError) as err:
-            HexDumper({"binary": True, "include": True})
         errmsg = str(err.exception)
         self.assertIn("incompatible", errmsg)
 
@@ -35,6 +31,12 @@ class TestXXDOptions(TestCase):
             HexDumper({"binary": True, "reverse": True})
         errmsg = str(err.exception)
         self.assertIn("incompatible", errmsg)
+
+    def test_cols_binary(self):
+        xxd = HexDumper({"binary": True})
+        expected = 6
+        actual = xxd.cols
+        self.assertEqual(expected, actual)
 
     # Cols has different defaults depending on whether -ps or -i have been specified
     def test_cols_default(self):
@@ -55,15 +57,15 @@ class TestXXDOptions(TestCase):
         actual = xxd.cols
         self.assertEqual(expected, actual)
 
-    def test_cols_binary(self):
-        xxd = HexDumper({"binary": True})
-        expected = 6
-        actual = xxd.cols
-        self.assertEqual(expected, actual)
+    def test_decimal(self):
+        xxd = HexDumper({"decimal": True})
+        self.assertTrue(xxd.decimal)
 
-    def test_EBCDIC(self):
-        xxd = HexDumper({})
-        self.assertFalse(xxd.EBCDIC)
+    def test_e_conflict_include(self):
+        with self.assertRaises(ValueError) as err:
+            HexDumper({"little_endian": True, "include": True})
+        errmsg = str(err.exception)
+        self.assertIn("incompatible", errmsg)
 
     # The -e option is incompatible with -ps, -i, or -r
     def test_e_conflict_postscript(self):
@@ -72,17 +74,21 @@ class TestXXDOptions(TestCase):
         errmsg = str(err.exception)
         self.assertIn("incompatible", errmsg)
 
-    def test_e_conflict_include(self):
-        with self.assertRaises(ValueError) as err:
-            HexDumper({"little_endian": True, "include": True})
-        errmsg = str(err.exception)
-        self.assertIn("incompatible", errmsg)
-
     def test_e_conflict_reverse(self):
         with self.assertRaises(ValueError) as err:
             HexDumper({"little_endian": True, "reverse": True})
         errmsg = str(err.exception)
         self.assertIn("incompatible", errmsg)
+
+    def test_EBCDIC(self):
+        xxd = HexDumper({})
+        self.assertFalse(xxd.EBCDIC)
+
+    def test_g_b(self):
+        xxd = HexDumper({"binary": True})
+        expected = 1
+        actual = xxd.octets_per_group
+        self.assertEqual(expected, actual)
 
     # Octets_per_group has different defaults depending on whether -e has been specified
     def test_g_default(self):
@@ -97,12 +103,6 @@ class TestXXDOptions(TestCase):
         actual = xxd.octets_per_group
         self.assertEqual(expected, actual)
 
-    def test_g_b(self):
-        xxd = HexDumper({"binary": True})
-        expected = 1
-        actual = xxd.octets_per_group
-        self.assertEqual(expected, actual)
-
     def test_g_ps(self):
         xxd = HexDumper({"postscript": True})
         expected = 2
@@ -113,23 +113,27 @@ class TestXXDOptions(TestCase):
         xxd = HexDumper({})
         self.assertFalse(xxd.include)
 
+    def test_infile(self):
+        xxd = HexDumper({"infile": "/usr/bin/cut"})
+        expected = "/usr/bin/cut"
+        actual = xxd.infile
+        self.assertEqual(expected, actual)
+
+    def test_infile_default(self):
+        xxd = HexDumper({})
+        self.assertIsNone(xxd.infile)
+
+    def test_infile_stdin(self):
+        xxd = HexDumper({"infile": "-"})
+        expected = "-"
+        actual = xxd.infile
+        self.assertEqual(expected, actual)
+
     def test_len(self):
         xxd = HexDumper({"len": "13"})
         expected = 13
         actual = xxd.length
         self.assertEqual(expected, actual)
-
-    def test_len_zero(self):
-        xxd = HexDumper({"len": "0"})
-        expected = 0
-        actual = xxd.length
-        self.assertEqual(expected, actual)
-
-    def test_len_negative(self):
-        with self.assertRaises(ValueError) as err:
-            HexDumper({"len": "-1"})
-        errmsg = str(err.exception)
-        self.assertIn("negative", errmsg)
 
     def test_len_bogus(self):
         with self.assertRaises(ValueError) as err:
@@ -140,7 +144,18 @@ class TestXXDOptions(TestCase):
     def test_len_default(self):
         xxd = HexDumper({})
         self.assertIsNone(xxd.length)
-        #self.assertFalse(hasattr(xxd, "length"))
+
+    def test_len_negative(self):
+        with self.assertRaises(ValueError) as err:
+            HexDumper({"len": "-1"})
+        errmsg = str(err.exception)
+        self.assertIn("negative", errmsg)
+
+    def test_len_zero(self):
+        xxd = HexDumper({"len": "0"})
+        expected = 0
+        actual = xxd.length
+        self.assertEqual(expected, actual)
 
     def test_name(self):
         xxd = HexDumper({"name": "wonderful"})
@@ -160,12 +175,6 @@ class TestXXDOptions(TestCase):
         actual = xxd.offset
         self.assertEqual(expected, actual)
 
-    def test_offset_negative(self):
-        with self.assertRaises(ValueError) as err:
-            HexDumper({"offset": -86})
-        errmsg = str(err.exception)
-        self.assertIn("negative", errmsg)
-
     def test_offset_bogus(self):
         with self.assertRaises(ValueError) as err:
             HexDumper({"offset": "bogus"})
@@ -178,6 +187,20 @@ class TestXXDOptions(TestCase):
         actual = xxd.offset
         self.assertEqual(expected, actual)
 
+    def test_offset_negative(self):
+        with self.assertRaises(ValueError) as err:
+            HexDumper({"offset": -86})
+        errmsg = str(err.exception)
+        self.assertIn("negative", errmsg)
+
+    def test_outfile(self):
+        xxd = HexDumper({})
+        self.assertIsNone(xxd.outfile)
+
+    def test_pname(self):
+        xxd = HexDumper({})
+        self.assertIsNotNone(xxd.pname)
+
     def test_postscript(self):
         xxd = HexDumper({"postscript": True})
         self.assertTrue(xxd.postscript)
@@ -185,10 +208,6 @@ class TestXXDOptions(TestCase):
     def test_reverse(self):
         xxd = HexDumper({"reverse": True})
         self.assertTrue(xxd.reverse)
-
-    def test_decimal(self):
-        xxd = HexDumper({"decimal": True})
-        self.assertTrue(xxd.decimal)
 
     def test_seek(self):
         xxd = HexDumper({"seek": 0x0100})
@@ -209,24 +228,4 @@ class TestXXDOptions(TestCase):
     def test_version(self):
         xxd = HexDumper({"version": True})
         self.assertTrue(xxd.version)
-
-    def test_infile(self):
-        xxd = HexDumper({"infile": "/usr/bin/cut"})
-        expected = "/usr/bin/cut"
-        actual = xxd.infile
-        self.assertEqual(expected, actual)
-
-    def test_infile_stdin(self):
-        xxd = HexDumper({"infile": "-"})
-        expected = "-"
-        actual = xxd.infile
-        self.assertEqual(expected, actual)
-
-    def test_infile_default(self):
-        xxd = HexDumper({})
-        self.assertIsNone(xxd.infile)
-
-    def test_outfile(self):
-        xxd = HexDumper({})
-        self.assertIsNone(xxd.outfile)
 
