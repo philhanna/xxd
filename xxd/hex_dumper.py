@@ -13,8 +13,8 @@ class HexDumper(Dumper):
     def mainline(self):
         """Runs the hex dumper"""
 
-        offset = 0
-        so_far = 0
+        self.file_offset = 0
+        self.so_far = 0
         if self.seek:
             seek = self.seek
             try:
@@ -22,7 +22,7 @@ class HexDumper(Dumper):
             except UnsupportedOperation as e:
                 for i in range(seek):
                     self.fpin.read(1)
-            offset += seek
+            self.file_offset += seek
 
         ################################################################
         # Handle c-include style output
@@ -103,7 +103,7 @@ class HexDumper(Dumper):
         while True:
             chunk_size = self.cols
             if hasattr(self, "length"):
-                if so_far + chunk_size > self.length:
+                if self.so_far + chunk_size > self.length:
                     chunk_size = self.length % chunk_size
             data = self.fpin.read(chunk_size)
             if len(data) == 0:
@@ -143,7 +143,7 @@ class HexDumper(Dumper):
                 if self.uppercase:
                     sdata = sdata.upper()
                 text = "".join(text_list)
-                offset_shown = offset
+                offset_shown = self.file_offset
                 if hasattr(self, "offset"):
                     if self.offset is not None:
                         if type(self.offset) != int:
@@ -170,11 +170,11 @@ class HexDumper(Dumper):
 
                 # Done with normal output
 
-            offset += chunk_size
-            so_far += len(data)
+            self.file_offset += chunk_size
+            self.so_far += len(data)
             if hasattr(self, "length"):
                 length = self.length
-                if so_far >= length:
+                if self.so_far >= length:
                     break
 
         if self.autoskip:

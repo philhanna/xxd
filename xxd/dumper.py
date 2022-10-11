@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 
 class Dumper(ABC):
     """Base class for hex dumpers of the three formats"""
+
     def __init__(self, args: dict):
         self.args = args
         self.reverse = None
@@ -12,6 +13,8 @@ class Dumper(ABC):
         self.pname: str = sys.argv[0].split("/")[-1]
         self.fpin = None
         self.fpout = None
+        self.so_far = None
+        self.file_offset = None
 
     @abstractmethod
     def mainline(self):
