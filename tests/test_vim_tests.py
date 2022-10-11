@@ -5,7 +5,7 @@ from io import BytesIO, StringIO
 from unittest import TestCase
 
 from tests import stdout_redirected, stdin_redirected, project_root_dir, testdata
-from xxd import HexDumper
+from xxd import HexDumper, CDumper
 
 tmp = tempfile.gettempdir()
 
@@ -188,56 +188,4 @@ class TestVimTests(TestCase):
                 app.run()
                 actual = out.getvalue()
         expected = "00000036: 3231 7374 204d 6179 2031 3939 36  21st May 1996\n"
-        self.assertEqual(expected, actual)
-
-    def test_7(self):
-        """Test 7: Print C include"""
-        indata = "TESTabcd09\n"
-        file1 = os.path.join(tmp, "XXDFile")
-        with open(file1, "wt") as fp:
-            fp.write(indata)
-
-        with StringIO() as out, stdout_redirected(out):
-            args = {
-                "include": True,
-                "infile": file1,
-                "name": "XXDFile",
-            }
-            app = HexDumper(args)
-            app.run()
-            actual = out.getvalue()
-
-        expected = """\
-unsigned char XXDFile[] = {
-  0x54, 0x45, 0x53, 0x54, 0x61, 0x62, 0x63, 0x64, 0x30, 0x39, 0x0a
-};
-unsigned int XXDFile_len = 11;
-"""
-        self.assertEqual(expected, actual)
-        os.remove(file1)
-
-    def test_8(self):
-        """Test 8: Print C include capitalized"""
-        indata = "TESTabcd09\n"
-        file1 = os.path.join(tmp, "XXDFile")
-        with open(file1, "wt") as fp:
-            fp.write(indata)
-
-        with StringIO() as out, stdout_redirected(out):
-            args = {
-                "include": True,
-                "infile": file1,
-                "capitalize": True,
-                "name": "XXDFile",
-            }
-            app = HexDumper(args)
-            app.run()
-            actual = out.getvalue()
-
-        expected = """\
-unsigned char XXDFILE[] = {
-  0x54, 0x45, 0x53, 0x54, 0x61, 0x62, 0x63, 0x64, 0x30, 0x39, 0x0a
-};
-unsigned int XXDFILE_LEN = 11;
-"""
         self.assertEqual(expected, actual)

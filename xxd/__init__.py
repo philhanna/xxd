@@ -41,13 +41,15 @@ ebcdic_table = [
 from .hex_type import HexType
 from .dumper import Dumper
 from .hex_dumper import HexDumper
+from .c_dumper import CDumper
 
 __all__ = [
-    'version_string',
-    'os_version',
-    'ebcdic_table',
+    'CDumper',
     'COLS',
-    'HexType',
     'Dumper',
+    'ebcdic_table',
     'HexDumper',
+    'HexType',
+    'os_version',
+    'version_string',
 ]

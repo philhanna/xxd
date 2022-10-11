@@ -1,12 +1,21 @@
+import os
 import sys
 from abc import ABC, abstractmethod
 from io import UnsupportedOperation
+
+from xxd import HexType, COLS
 
 
 class Dumper(ABC):
     """Base class for hex dumpers of the three formats"""
 
     def __init__(self, args: dict):
+        """Creates a new XXD object with specified options.
+        Note that defaults are implemented here by the dictionary 'get(key, default)' approach.
+        Incompatible options raise a ValueError.
+        """
+        args = args if args else {}
+
         self.seek = None
         self.args = args
         self.reverse = None
@@ -17,6 +26,129 @@ class Dumper(ABC):
         self.fpout = None
         self.so_far = None
         self.file_offset = None
+        self.autoskip: bool = args.get("autoskip", False)
+        self.autoskip_lines = None
+        self.autoskip_state = None
+        self.hextype = HexType.HEX_NORMAL
+
+        # Binary option is incompatible with -ps, -i, or -r
+        self.binary: bool = args.get("binary", False)
+        if self.binary:
+            for other in ["postscript", "include", "reverse"]:
+                if other in args.keys() and args[other]:
+                    raise ValueError("-b option is incompatible with -ps, -i, or -r.")
+            self.hextype = HexType.HEX_BITS
+
+        self.capitalize: bool = args.get("capitalize", False)
+
+        # Cols option has different defaults depending on whether -ps or -i have been specified
+        if args.get("postscript", False):
+            self.cols = 30
+        elif args.get("include", False):
+            self.cols = 12
+        elif self.binary:
+            self.cols = 6
+        else:
+            self.cols = 16
+        if "cols" in args:  # See if an override was specified
+            attr_cols = args.get("cols", None)
+            if attr_cols is not None:
+                try:
+                    if type(attr_cols) != int:
+                        attr_cols: int = int(attr_cols, 0)
+                    self.cols = attr_cols
+                except ValueError as e:
+                    errmsg = f"-c {attr_cols} is not numeric"
+                    raise ValueError(errmsg)
+                if self.cols < 0:
+                    raise ValueError(f"-c {attr_cols} is not a non-negative integer")
+
+        if self.cols > COLS:
+            raise ValueError(f"Number of columns {self.cols} cannot be greater than {COLS}")
+
+        self.EBCDIC: bool = args.get("EBCDIC", False)
+
+        # Little endian option is incompatible with -ps, -i, or -r
+        self.little_endian: bool = args.get("little_endian", False)
+        if self.little_endian:
+            for other in ["postscript", "include", "reverse"]:
+                if other in args.keys():
+                    raise ValueError("-e option is incompatible with -ps, -i, or -r.")
+
+        # C-style includes
+        self.include = args.get("include", False)
+
+        # Octets per group option has different defaults depending on other -e has been specified
+        if args.get("little_endian", False):
+            self.octets_per_group = 4
+        elif self.binary:
+            self.octets_per_group = 1
+        elif args.get("postscript", False):
+            self.octets_per_group = 2
+        elif args.get("include", False):
+            self.octets_per_group = 0
+        else:
+            self.octets_per_group = 2
+
+        # check for overrides
+        attr_octets_per_group = args.get("octets_per_group", None)
+        if attr_octets_per_group is not None:
+            try:
+                if type(attr_octets_per_group) != int:
+                    attr_octets_per_group: int = int(attr_octets_per_group, 0)
+                self.octets_per_group = attr_octets_per_group
+            except ValueError as e:
+                errmsg = f"-o {attr_octets_per_group} is not numeric"
+                raise ValueError(errmsg)
+            if self.octets_per_group < 0:
+                raise ValueError(f"-o {attr_octets_per_group} is not a non-negative integer")
+
+        self.include: bool = args.get("include", False)
+
+        length = args.get("len", None)
+        if length is not None:
+            try:
+                if type(length) != int:
+                    length = int(length, 0)
+                self.length = length
+            except ValueError as e:
+                errmsg = f"-l {length} is not numeric"
+                raise ValueError(errmsg)
+            if self.length < 0:
+                raise ValueError(f"{length} is not a non-negative integer")
+
+        self.name: str = args.get("name", None)
+
+        attr_offset = args.get("offset", 0)
+        if attr_offset is not None:
+            try:
+                if type(attr_offset) != int:
+                    attr_offset: int = int(attr_offset, 0)
+                self.offset = attr_offset
+            except ValueError as e:
+                errmsg = f"-o {attr_offset} is not numeric"
+                raise ValueError(errmsg)
+            if self.offset < 0:
+                raise ValueError(f"{attr_offset=} is not a non-negative integer")
+
+        self.postscript: bool = args.get("postscript", False)
+        self.reverse: bool = args.get("reverse", False)
+        self.decimal: bool = args.get("decimal", False)
+        if args.get("seek") is None:
+            args["seek"] = None
+        self.seek = args.get("seek", None)
+        if self.seek is None:
+            self.seek = 0
+        elif type(self.seek) != int:
+            self.seek = int(self.seek, 0)
+        self.uppercase: bool = args.get("uppercase", False)
+        self.version: bool = args.get("version", False)
+
+        self.infile: str = args.get("infile", None)
+        if self.infile and not self.infile == '-':
+            if not os.path.exists(self.infile):
+                raise RuntimeError(f"{self.pname}: {self.infile}: No such file or directory")
+        self.outfile: str = args.get("outfile", None)
 
     @abstractmethod
     def mainline(self):

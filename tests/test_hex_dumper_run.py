@@ -146,32 +146,6 @@ class TestHexDumperRun(TestCase):
         errmsg = str(x.exception)
         self.assertIn("columns", errmsg)
 
-    def test_include(self):
-        file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-i", "-l", "60", "-C", "testdata/short", file1]
-        runxxd(parms)
-
-        file2 = os.path.join(tmp, "file2")
-        args = {
-            "include": True,
-            "len": 60,
-            "capitalize": True,
-            "infile": "testdata/short",
-            "outfile": file2
-        }
-
-        # Need to chdir so that the input file is found.
-        # I can't specify a full path because that's what is used
-        # to form the varname of the include file
-        with SaveDirectory():
-            os.chdir(project_root_dir)
-            app = HexDumper(args)
-            app.run()
-
-        self.assertTrue(filecmp.cmp(file1, file2))
-        os.remove(file1)
-        os.remove(file2)
-
     def test_ebcdic(self):
         file1 = os.path.join(tmp, "file1")
         parms = ["xxd", "-E", "testdata/short", file1]
@@ -204,31 +178,6 @@ class TestHexDumperRun(TestCase):
         file2 = os.path.join(tmp, "file2")
         args = {
             "postscript": True,
-            "infile": "testdata/short",
-            "outfile": file2
-        }
-
-        # Need to chdir so that the input file is found.
-        # I can't specify a full path because that's what is used
-        # to form the varname of the include file
-        with SaveDirectory():
-            os.chdir(project_root_dir)
-            app = HexDumper(args)
-            app.run()
-
-        self.assertTrue(filecmp.cmp(file1, file2))
-        os.remove(file1)
-        os.remove(file2)
-
-    def test_name(self):
-        file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-i", "-n", "3om", "testdata/short", file1]
-        runxxd(parms)
-
-        file2 = os.path.join(tmp, "file2")
-        args = {
-            "include": True,
-            "name": "3om",
             "infile": "testdata/short",
             "outfile": file2
         }

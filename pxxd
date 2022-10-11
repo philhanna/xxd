@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from xxd import HexDumper, version_string, os_version
+from xxd import HexDumper, version_string, os_version, CDumper
 
 parser = argparse.ArgumentParser(description="xxd")
 parser.add_argument("-a", "--autoskip", action="store_true",
@@ -53,7 +53,10 @@ for name in ["skip", "seek"]:
         args["seek"] = args[name]
 del args["skip"]
 try:
-    xxd = HexDumper(args)
+    if args["include"]:
+        xxd = CDumper(args)
+    else:
+        xxd = HexDumper(args)
     xxd.run()
 except Exception as e:
     print(f"{e}")
