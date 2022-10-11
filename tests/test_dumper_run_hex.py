@@ -8,7 +8,7 @@ from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDir
 from xxd import HexDumper
 
 
-class TestHexDumperRun(TestCase):
+class TestDumperRunHex(TestCase):
 
     def test_default(self):
         file1 = os.path.join(tmp, "file1")

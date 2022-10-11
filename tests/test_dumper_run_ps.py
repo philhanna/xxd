@@ -8,7 +8,7 @@ from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDir
 from xxd import HexDumper, PostscriptDumper
 
 
-class TestHexDumperRun(TestCase):
+class TestDumperRunPostscript(TestCase):
 
     def test_postscript(self):
         file1 = os.path.join(tmp, "file1")

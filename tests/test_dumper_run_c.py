@@ -7,7 +7,7 @@ from tests import tmp, runxxd, SaveDirectory, project_root_dir, stdout_redirecte
 from xxd import CDumper
 
 
-class TestRunCDumper(TestCase):
+class TestDumperRunC(TestCase):
 
     def test_include(self):
         file1 = os.path.join(tmp, "file1")
