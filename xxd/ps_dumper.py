@@ -19,7 +19,7 @@ class PostscriptDumper(Dumper):
         super().mainline()  # Important!
         while True:
             chunk_size = self.cols
-            if hasattr(self, "length"):
+            if self.length is not None:
                 if self.so_far + chunk_size > self.length:
                     chunk_size = self.length % chunk_size
             data = self.fpin.read(chunk_size)
@@ -37,7 +37,7 @@ class PostscriptDumper(Dumper):
 
             self.file_offset += chunk_size
             self.so_far += len(data)
-            if hasattr(self, "length"):
+            if self.length is not None:
                 length = self.length
                 if self.so_far >= length:
                     break

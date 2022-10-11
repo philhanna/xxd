@@ -139,7 +139,8 @@ class TestXXDOptions(TestCase):
 
     def test_len_default(self):
         xxd = HexDumper({})
-        self.assertFalse(hasattr(xxd, "length"))
+        self.assertIsNone(xxd.length)
+        #self.assertFalse(hasattr(xxd, "length"))
 
     def test_name(self):
         xxd = HexDumper({"name": "wonderful"})

@@ -36,22 +36,9 @@ class Dumper(ABC):
         self.EBCDIC: bool = args.get("EBCDIC", False)
         self.little_endian: bool = self.set_little_endian(args)
         self.include: bool = args.get("include", False)
-        self.octets_per_group = self.set_octets_per_group(args)
-
-        length = args.get("len", None)
-        if length is not None:
-            try:
-                if type(length) != int:
-                    length = int(length, 0)
-                self.length = length
-            except ValueError as e:
-                errmsg = f"-l {length} is not numeric"
-                raise ValueError(errmsg)
-            if self.length < 0:
-                raise ValueError(f"{length} is not a non-negative integer")
-
+        self.length = self.set_length(args)
         self.name: str = args.get("name", None)
-
+        self.octets_per_group = self.set_octets_per_group(args)
         attr_offset = args.get("offset", 0)
         if attr_offset is not None:
             try:
@@ -155,6 +142,20 @@ class Dumper(ABC):
         if cols > COLS:
             raise ValueError(f"Number of columns {cols} cannot be greater than {COLS}")
         return cols
+
+    def set_length(self, args):
+        length = args.get("len", None)
+        if length is None:
+            return None
+        try:
+            if type(length) != int:
+                length = int(length, 0)
+        except ValueError as e:
+            errmsg = f"-l {length} is not numeric"
+            raise ValueError(errmsg)
+        if length < 0:
+            raise ValueError(f"{length} is not a non-negative integer")
+        return length
 
     def set_little_endian(self, args):
         """Little endian option is incompatible with -ps, -i, or -r"""

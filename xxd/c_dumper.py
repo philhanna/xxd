@@ -49,7 +49,7 @@ class CDumper(Dumper):
         cinc = []
         c = self.fpin.read(1)
         while len(c) > 0:
-            if hasattr(self, "length"):
+            if self.length is not None:
                 if n >= self.length:
                     break
             n += 1
