@@ -39,18 +39,7 @@ class Dumper(ABC):
         self.length = self.set_length(args)
         self.name: str = args.get("name", None)
         self.octets_per_group = self.set_octets_per_group(args)
-        attr_offset = args.get("offset", 0)
-        if attr_offset is not None:
-            try:
-                if type(attr_offset) != int:
-                    attr_offset: int = int(attr_offset, 0)
-                self.offset = attr_offset
-            except ValueError as e:
-                errmsg = f"-o {attr_offset} is not numeric"
-                raise ValueError(errmsg)
-            if self.offset < 0:
-                raise ValueError(f"{attr_offset=} is not a non-negative integer")
-
+        self.offset = self.set_offset(args)
         self.postscript: bool = args.get("postscript", False)
         self.reverse: bool = args.get("reverse", False)
         self.decimal: bool = args.get("decimal", False)
@@ -220,3 +209,17 @@ class Dumper(ABC):
     @abstractmethod
     def get_default_octets_per_group(self) -> int:
         pass
+
+    def set_offset(self, args):
+        attr_offset = args.get("offset", 0)
+        if attr_offset is None:
+            return None
+        try:
+            if type(attr_offset) != int:
+                attr_offset: int = int(attr_offset, 0)
+        except ValueError as e:
+            errmsg = f"-o {attr_offset} is not numeric"
+            raise ValueError(errmsg)
+        if attr_offset < 0:
+            raise ValueError(f"{attr_offset=} is not a non-negative integer")
+        return attr_offset
