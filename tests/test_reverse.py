@@ -4,18 +4,8 @@ import subprocess
 import tempfile
 from unittest import TestCase, skip
 
-from tests import project_root_dir, SaveDirectory
+from tests import project_root_dir, SaveDirectory, tmp, runxxd
 from xxd import HexDumper
-
-tmp = tempfile.gettempdir()
-
-
-def runxxd(parms) -> subprocess.CompletedProcess:
-    return subprocess.run(parms,
-                          cwd=project_root_dir,
-                          check=True,
-                          text=True,
-                          capture_output=True)
 
 
 class TestReverse(TestCase):
