@@ -1,11 +1,13 @@
 import sys
 from abc import ABC, abstractmethod
+from io import UnsupportedOperation
 
 
 class Dumper(ABC):
     """Base class for hex dumpers of the three formats"""
 
     def __init__(self, args: dict):
+        self.seek = None
         self.args = args
         self.reverse = None
         self.outfile = None
@@ -19,7 +21,17 @@ class Dumper(ABC):
     @abstractmethod
     def mainline(self):
         """Runs the dumper"""
-        pass
+
+        self.file_offset = 0
+        self.so_far = 0
+        if self.seek:
+            seek = self.seek
+            try:
+                self.fpin.seek(seek)
+            except UnsupportedOperation as e:
+                for i in range(seek):
+                    self.fpin.read(1)
+            self.file_offset += seek
 
     @abstractmethod
     def mainline_reverse(self):

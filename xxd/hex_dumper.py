@@ -1,7 +1,6 @@
 import os.path
 import re
 import string
-import sys
 from io import UnsupportedOperation
 
 from xxd import HexType, COLS, ebcdic_table, Dumper
@@ -13,16 +12,7 @@ class HexDumper(Dumper):
     def mainline(self):
         """Runs the hex dumper"""
 
-        self.file_offset = 0
-        self.so_far = 0
-        if self.seek:
-            seek = self.seek
-            try:
-                self.fpin.seek(seek)
-            except UnsupportedOperation as e:
-                for i in range(seek):
-                    self.fpin.read(1)
-            self.file_offset += seek
+        super().mainline()
 
         ################################################################
         # Handle c-include style output
