@@ -10,6 +10,10 @@ class HexDumper(Dumper):
     def __init__(self, args):
         super().__init__(args)
 
+    def get_default_columns(self) -> int:
+        cols = 6 if self.binary else 16
+        return cols
+
     def mainline(self):
         """Runs the hex dumper"""
 

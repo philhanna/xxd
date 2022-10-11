@@ -42,29 +42,7 @@ class Dumper(ABC):
         self.capitalize: bool = args.get("capitalize", False)
 
         # Cols option has different defaults depending on whether -ps or -i have been specified
-        if args.get("postscript", False):
-            self.cols = 30
-        elif args.get("include", False):
-            self.cols = 12
-        elif self.binary:
-            self.cols = 6
-        else:
-            self.cols = 16
-        if "cols" in args:  # See if an override was specified
-            attr_cols = args.get("cols", None)
-            if attr_cols is not None:
-                try:
-                    if type(attr_cols) != int:
-                        attr_cols: int = int(attr_cols, 0)
-                    self.cols = attr_cols
-                except ValueError as e:
-                    errmsg = f"-c {attr_cols} is not numeric"
-                    raise ValueError(errmsg)
-                if self.cols < 0:
-                    raise ValueError(f"-c {attr_cols} is not a non-negative integer")
-
-        if self.cols > COLS:
-            raise ValueError(f"Number of columns {self.cols} cannot be greater than {COLS}")
+        self.cols = self.set_columns(args)
 
         self.EBCDIC: bool = args.get("EBCDIC", False)
 
@@ -150,14 +128,6 @@ class Dumper(ABC):
                 raise RuntimeError(f"{self.pname}: {self.infile}: No such file or directory")
         self.outfile: str = args.get("outfile", None)
 
-    def data_format(self, b):
-        result = None
-        if self.hextype == HexType.HEX_BITS:
-            result = format(b, "08b")
-        else:
-            result = format(b, "02x")
-        return result
-
     @abstractmethod
     def mainline(self):
         """Runs the dumper"""
@@ -213,3 +183,33 @@ class Dumper(ABC):
                 self.fpout.flush()
                 if self.fpout != sys.stdout:
                     self.fpout.close()
+
+    def data_format(self, b):
+        result = None
+        if self.hextype == HexType.HEX_BITS:
+            result = format(b, "08b")
+        else:
+            result = format(b, "02x")
+        return result
+
+    @abstractmethod
+    def get_default_columns(self) -> int:
+        pass
+
+    def set_columns(self, args):
+        cols = self.get_default_columns()
+        if "cols" in args:  # See if an override was specified
+            attr_cols = args.get("cols", None)
+            if attr_cols is not None:
+                try:
+                    if type(attr_cols) != int:
+                        attr_cols: int = int(attr_cols, 0)
+                    cols = attr_cols
+                except ValueError as e:
+                    errmsg = f"-c {attr_cols} is not numeric"
+                    raise ValueError(errmsg)
+                if cols < 0:
+                    raise ValueError(f"-c {attr_cols} is not a non-negative integer")
+        if cols > COLS:
+            raise ValueError(f"Number of columns {cols} cannot be greater than {COLS}")
+        return cols

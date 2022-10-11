@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from xxd import HexDumper
+from xxd import HexDumper, CDumper, PostscriptDumper
 
 
 class TestXXDOptions(TestCase):
@@ -44,13 +44,13 @@ class TestXXDOptions(TestCase):
         self.assertEqual(expected, actual)
 
     def test_cols_postscript(self):
-        xxd = HexDumper({"postscript": True})
+        xxd = PostscriptDumper({"postscript": True})
         expected = 30
         actual = xxd.cols
         self.assertEqual(expected, actual)
 
     def test_cols_include(self):
-        xxd = HexDumper({"include": True})
+        xxd = CDumper({"include": True})
         expected = 12
         actual = xxd.cols
         self.assertEqual(expected, actual)
