@@ -17,7 +17,6 @@ class Dumper(ABC):
         args = args if args else {}
         self.args = args
 
-        self.seek = None
         self.reverse = None
         self.outfile = None
         self.infile = None
@@ -43,13 +42,7 @@ class Dumper(ABC):
         self.postscript: bool = args.get("postscript", False)
         self.reverse: bool = args.get("reverse", False)
         self.decimal: bool = args.get("decimal", False)
-        if args.get("seek") is None:
-            args["seek"] = None
-        self.seek = args.get("seek", None)
-        if self.seek is None:
-            self.seek = 0
-        elif type(self.seek) != int:
-            self.seek = int(self.seek, 0)
+        self.seek = self.set_seek(args)
         self.uppercase: bool = args.get("uppercase", False)
         self.version: bool = args.get("version", False)
 
@@ -146,6 +139,20 @@ class Dumper(ABC):
             raise ValueError(f"{length} is not a non-negative integer")
         return length
 
+    def set_seek(self, args):
+        seek = args.get("seek", None)
+        if seek is None:
+            return None
+        try:
+            if type(seek) != int:
+                seek = int(seek, 0)
+        except ValueError as e:
+            errmsg = f"-s {seek} is not numeric"
+            raise ValueError(errmsg)
+        if seek < 0:
+            raise ValueError(f"{seek} is not a non-negative integer")
+        return seek
+
     def set_little_endian(self, args):
         """Little endian option is incompatible with -ps, -i, or -r"""
         little_endian: bool = args.get("little_endian", False)
@@ -182,13 +189,27 @@ class Dumper(ABC):
                 raise ValueError(f"-o {attr_octets_per_group} is not a non-negative integer")
         return octets_per_group
 
+    def set_offset(self, args):
+        offset = args.get("offset", None)
+        if offset is None:
+            return None
+        try:
+            if type(offset) != int:
+                offset = int(offset, 0)
+        except ValueError as e:
+            errmsg = f"-o {offset} is not numeric"
+            raise ValueError(errmsg)
+        if offset < 0:
+            raise ValueError(f"{offset} is not a non-negative integer")
+        return offset
+
     @abstractmethod
     def mainline(self):
         """Runs the dumper"""
 
         self.file_offset = 0
         self.so_far = 0
-        if self.seek:
+        if self.seek is not None:
             seek = self.seek
             try:
                 self.fpin.seek(seek)

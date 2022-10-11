@@ -198,7 +198,7 @@ class TestXXDOptions(TestCase):
 
     def test_seek_default(self):
         xxd = HexDumper({})
-        expected = 0
+        expected = None
         actual = xxd.seek
         self.assertEqual(expected, actual)
 
