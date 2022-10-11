@@ -1,3 +1,5 @@
+import re
+
 from xxd import Dumper
 
 
@@ -35,4 +37,25 @@ class PostscriptDumper(Dumper):
                     break
 
     def mainline_reverse(self):
-        super().mainline_reverse()  # Important!
+        """Reconstructs the original file"""
+        super().mainline_reverse()  # Important! Or maybe not, for ps
+        if self.seek:
+            for i in range(self.seek):
+                self.fpout.write(b'\x00')
+
+        for line in self.fpin.readlines():
+
+            # Convert to string
+            line = str(line)
+
+            # Get the hex pairs, convert to characters, and write to output
+            hex_pairs = [int(hex_pair, 16)
+                         for hex_pair
+                         in re.findall("[0-9a-fA-F]{2}", line)]
+            for c in hex_pairs:
+                b = bytes([c])
+                try:
+                    self.fpout.write(b)
+                except TypeError:
+                    ch = chr(c)
+                    self.fpout.write(ch)

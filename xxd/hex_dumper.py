@@ -164,7 +164,7 @@ class HexDumper(Dumper):
             return "."
 
     def mainline_reverse(self):
-
+        """Reconstructs the original file"""
         if self.seek:
             for i in range(self.seek):
                 self.fpout.write(b'\x00')
@@ -173,18 +173,18 @@ class HexDumper(Dumper):
 
             # Convert to string
             line = str(line)
-            if not self.postscript:
-                # Skip the offset
-                p = line.find(": ")
-                if p < 0:
-                    continue
-                line = line[p + 2:]
 
-                # Skip the text
-                q = line.find("  ")
-                if q < 0:
-                    continue
-                line = line[0:q]
+            # Skip the offset
+            p = line.find(": ")
+            if p < 0:
+                continue
+            line = line[p + 2:]
+
+            # Skip the text
+            q = line.find("  ")
+            if q < 0:
+                continue
+            line = line[0:q]
 
             # Get the hex pairs, convert to characters, and write to output
             hex_pairs = [int(hex_pair, 16)
