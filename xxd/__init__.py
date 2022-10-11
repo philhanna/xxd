@@ -39,6 +39,7 @@ ebcdic_table = [
 ]
 
 from .hex_type import HexType
+from .dumper import Dumper
 from .hex_dumper import HexDumper
 
 __all__ = [
@@ -47,5 +48,6 @@ __all__ = [
     'ebcdic_table',
     'COLS',
     'HexType',
+    'Dumper',
     'HexDumper',
 ]

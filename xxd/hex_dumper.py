@@ -5,10 +5,10 @@ import string
 import sys
 from io import UnsupportedOperation
 
-from xxd import HexType, COLS, ebcdic_table
+from xxd import HexType, COLS, ebcdic_table, Dumper
 
 
-class HexDumper:
+class HexDumper(Dumper):
     """Python version of Juergen Weigert's xxd"""
 
     def mainline(self):
