@@ -1,3 +1,4 @@
+"""A Python work-alike for xxd"""
 import sys
 
 version_string = "xxd 2022-09-16 by Juergen Weigert et al."

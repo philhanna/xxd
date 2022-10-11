@@ -87,6 +87,10 @@ class CDumper(Dumper):
 
     @staticmethod
     def convert_to_valid_c_variable_name(varname):
+        """In C include-style output, there are two variable names
+        that are generated.  They are derived from the program name.
+        This method ensures that the program name is valid for this
+        purpose.  It will change any invalid characters to underscores."""
         if varname[0].isdigit():
             varname = "__" + varname
         valid = []

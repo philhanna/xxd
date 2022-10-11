@@ -234,15 +234,14 @@ class Dumper(ABC):
     @abstractmethod
     def mainline_reverse(self):
         """Recreates original file from the hex output"""
-        pass
 
     @abstractmethod
     def get_default_columns(self) -> int:
-        pass
+        """Returns the default number of columns for this output type"""
 
     @abstractmethod
     def get_default_octets_per_group(self) -> int:
-        pass
+        """Returns the default number of octets per group for this output type"""
 
     def set_offset(self, args):
         attr_offset = args.get("offset", 0)
