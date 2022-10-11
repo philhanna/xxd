@@ -29,7 +29,7 @@ class PostscriptDumper(Dumper):
             if type(data) == str:
                 data = bytes(data.encode("utf-8"))
 
-            line = "".join([self.data_format(b) for b in data]) + "\n"
+            line = "".join([self.data_format(b, self.hextype) for b in data]) + "\n"
             try:
                 self.fpout.write(line)
             except TypeError:

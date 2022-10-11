@@ -49,7 +49,7 @@ class HexDumper(Dumper):
             ]
 
             hex_list = [
-                "".join([self.data_format(b) for b in chunk_bytes])
+                "".join([self.data_format(b, self.hextype) for b in chunk_bytes])
                 for chunk_bytes in data_list
             ]
 

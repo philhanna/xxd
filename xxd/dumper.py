@@ -45,10 +45,10 @@ class Dumper(ABC):
         self.uppercase: bool = args.get("uppercase", False)
         self.version: bool = args.get("version", False)
 
-    def data_format(self, b):
+    @staticmethod
+    def data_format(b, hextype: HexType) -> str:
         """Converts a byte to a hex or binary string"""
-        result = None
-        if self.hextype == HexType.HEX_BITS:
+        if hextype == HexType.HEX_BITS:
             result = format(b, "08b")
         else:
             result = format(b, "02x")
