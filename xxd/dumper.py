@@ -45,11 +45,7 @@ class Dumper(ABC):
         self.seek = self.set_seek(args)
         self.uppercase: bool = args.get("uppercase", False)
         self.version: bool = args.get("version", False)
-
-        self.infile: str = args.get("infile", None)
-        if self.infile and not self.infile == '-':
-            if not os.path.exists(self.infile):
-                raise RuntimeError(f"{self.pname}: {self.infile}: No such file or directory")
+        self.infile = self.set_infile(args)
         self.outfile: str = args.get("outfile", None)
 
     def data_format(self, b):
@@ -125,6 +121,13 @@ class Dumper(ABC):
             raise ValueError(f"Number of columns {cols} cannot be greater than {COLS}")
         return cols
 
+    def set_infile(self, args):
+        infile: str = args.get("infile", None)
+        if infile and not infile == '-':
+            if not os.path.exists(infile):
+                raise RuntimeError(f"{self.pname}: {infile}: No such file or directory")
+        return infile
+
     def set_length(self, args):
         length = args.get("len", None)
         if length is None:
@@ -138,20 +141,6 @@ class Dumper(ABC):
         if length < 0:
             raise ValueError(f"{length} is not a non-negative integer")
         return length
-
-    def set_seek(self, args):
-        seek = args.get("seek", None)
-        if seek is None:
-            return None
-        try:
-            if type(seek) != int:
-                seek = int(seek, 0)
-        except ValueError as e:
-            errmsg = f"-s {seek} is not numeric"
-            raise ValueError(errmsg)
-        if seek < 0:
-            raise ValueError(f"{seek} is not a non-negative integer")
-        return seek
 
     def set_little_endian(self, args):
         """Little endian option is incompatible with -ps, -i, or -r"""
@@ -202,6 +191,20 @@ class Dumper(ABC):
         if offset < 0:
             raise ValueError(f"{offset} is not a non-negative integer")
         return offset
+
+    def set_seek(self, args):
+        seek = args.get("seek", None)
+        if seek is None:
+            return None
+        try:
+            if type(seek) != int:
+                seek = int(seek, 0)
+        except ValueError as e:
+            errmsg = f"-s {seek} is not numeric"
+            raise ValueError(errmsg)
+        if seek < 0:
+            raise ValueError(f"{seek} is not a non-negative integer")
+        return seek
 
     @abstractmethod
     def mainline(self):
