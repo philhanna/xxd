@@ -14,6 +14,15 @@ class HexDumper(Dumper):
         cols = 6 if self.binary else 16
         return cols
 
+    def get_default_octets_per_group(self) -> int:
+        if self.args.get("little_endian", False):
+            octets_per_group = 4
+        elif self.binary:
+            octets_per_group = 1
+        else:
+            octets_per_group = 2
+        return octets_per_group
+
     def mainline(self):
         """Runs the hex dumper"""
 
@@ -102,6 +111,49 @@ class HexDumper(Dumper):
                 self.xxd_line("*\n")
                 self.xxd_line(self.autoskip_lines[-1])
 
+    def mainline_reverse(self):
+        """Reconstructs the original file"""
+        if self.seek:
+            for i in range(self.seek):
+                self.fpout.write(b'\x00')
+
+        for line in self.fpin.readlines():
+
+            # Convert to string
+            line = str(line)
+
+            # Skip the offset
+            p = line.find(": ")
+            if p < 0:
+                continue
+            line = line[p + 2:]
+
+            # Skip the text
+            q = line.find("  ")
+            if q < 0:
+                continue
+            line = line[0:q]
+
+            # Get the hex pairs, convert to characters, and write to output
+            hex_pairs = [int(hex_pair, 16)
+                         for hex_pair
+                         in re.findall("[0-9a-fA-F]{2}", line)]
+            for c in hex_pairs:
+                b = bytes([c])
+                try:
+                    self.fpout.write(b)
+                except TypeError:
+                    ch = chr(c)
+                    self.fpout.write(ch)
+
+    def text_format(self, c: int):
+        if self.EBCDIC:
+            c = ebcdic_table[c]
+        if c < 128 and chr(c).isprintable():
+            return chr(c)
+        else:
+            return "."
+
     def xxd_line(self, line):
         bline = line.encode('utf-8')
         try:
@@ -158,46 +210,3 @@ class HexDumper(Dumper):
                 self.autoskip_lines.clear()
                 self.xxd_line(line)
                 self.autoskip_state = 0
-
-    def text_format(self, c: int):
-        if self.EBCDIC:
-            c = ebcdic_table[c]
-        if c < 128 and chr(c).isprintable():
-            return chr(c)
-        else:
-            return "."
-
-    def mainline_reverse(self):
-        """Reconstructs the original file"""
-        if self.seek:
-            for i in range(self.seek):
-                self.fpout.write(b'\x00')
-
-        for line in self.fpin.readlines():
-
-            # Convert to string
-            line = str(line)
-
-            # Skip the offset
-            p = line.find(": ")
-            if p < 0:
-                continue
-            line = line[p + 2:]
-
-            # Skip the text
-            q = line.find("  ")
-            if q < 0:
-                continue
-            line = line[0:q]
-
-            # Get the hex pairs, convert to characters, and write to output
-            hex_pairs = [int(hex_pair, 16)
-                         for hex_pair
-                         in re.findall("[0-9a-fA-F]{2}", line)]
-            for c in hex_pairs:
-                b = bytes([c])
-                try:
-                    self.fpout.write(b)
-                except TypeError:
-                    ch = chr(c)
-                    self.fpout.write(ch)

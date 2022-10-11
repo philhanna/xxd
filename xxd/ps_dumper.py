@@ -9,6 +9,9 @@ class PostscriptDumper(Dumper):
     def get_default_columns(self) -> int:
         return 30
 
+    def get_default_octets_per_group(self) -> int:
+        return 2
+
     def __init__(self, args):
         super().__init__(args)
 

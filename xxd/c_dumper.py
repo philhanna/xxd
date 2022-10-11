@@ -12,6 +12,9 @@ class CDumper(Dumper):
     def get_default_columns(self) -> int:
         return 12
 
+    def get_default_octets_per_group(self) -> int:
+        return 0
+
     def mainline(self):
         super().mainline()  # Important!
 

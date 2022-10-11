@@ -15,9 +15,9 @@ class Dumper(ABC):
         Incompatible options raise a ValueError.
         """
         args = args if args else {}
+        self.args = args
 
         self.seek = None
-        self.args = args
         self.reverse = None
         self.outfile = None
         self.infile = None
@@ -35,34 +35,8 @@ class Dumper(ABC):
         self.cols = self.set_columns(args)
         self.EBCDIC: bool = args.get("EBCDIC", False)
         self.little_endian: bool = self.set_little_endian(args)
-        self.include = args.get("include", False)
-
-        # Octets per group option has different defaults depending on other -e has been specified
-        if args.get("little_endian", False):
-            self.octets_per_group = 4
-        elif self.binary:
-            self.octets_per_group = 1
-        elif args.get("postscript", False):
-            self.octets_per_group = 2
-        elif args.get("include", False):
-            self.octets_per_group = 0
-        else:
-            self.octets_per_group = 2
-
-        # check for overrides
-        attr_octets_per_group = args.get("octets_per_group", None)
-        if attr_octets_per_group is not None:
-            try:
-                if type(attr_octets_per_group) != int:
-                    attr_octets_per_group: int = int(attr_octets_per_group, 0)
-                self.octets_per_group = attr_octets_per_group
-            except ValueError as e:
-                errmsg = f"-o {attr_octets_per_group} is not numeric"
-                raise ValueError(errmsg)
-            if self.octets_per_group < 0:
-                raise ValueError(f"-o {attr_octets_per_group} is not a non-negative integer")
-
         self.include: bool = args.get("include", False)
+        self.octets_per_group = self.set_octets_per_group(args)
 
         length = args.get("len", None)
         if length is not None:
@@ -109,44 +83,13 @@ class Dumper(ABC):
                 raise RuntimeError(f"{self.pname}: {self.infile}: No such file or directory")
         self.outfile: str = args.get("outfile", None)
 
-    def set_little_endian(self, args):
-        """Little endian option is incompatible with -ps, -i, or -r"""
-        little_endian: bool = args.get("little_endian", False)
-        if little_endian:
-            for other in ["postscript", "include", "reverse"]:
-                if other in args.keys():
-                    raise ValueError("-e option is incompatible with -ps, -i, or -r.")
-        return little_endian
-
-    def set_binary(self, args) -> bool:
-        """Binary option is incompatible with -ps, -i, or -r"""
-        binary: bool = args.get("binary", False)
-        if binary:
-            for other in ["postscript", "include", "reverse"]:
-                if other in args.keys() and args[other]:
-                    raise ValueError("-b option is incompatible with -ps, -i, or -r.")
-            self.hextype = HexType.HEX_BITS
-        return binary
-
-    @abstractmethod
-    def mainline(self):
-        """Runs the dumper"""
-
-        self.file_offset = 0
-        self.so_far = 0
-        if self.seek:
-            seek = self.seek
-            try:
-                self.fpin.seek(seek)
-            except UnsupportedOperation as e:
-                for i in range(seek):
-                    self.fpin.read(1)
-            self.file_offset += seek
-
-    @abstractmethod
-    def mainline_reverse(self):
-        """Recreates original file from the hex output"""
-        pass
+    def data_format(self, b):
+        result = None
+        if self.hextype == HexType.HEX_BITS:
+            result = format(b, "08b")
+        else:
+            result = format(b, "02x")
+        return result
 
     def run(self):
         """Calls mainline with specified input and output files"""
@@ -184,17 +127,15 @@ class Dumper(ABC):
                 if self.fpout != sys.stdout:
                     self.fpout.close()
 
-    def data_format(self, b):
-        result = None
-        if self.hextype == HexType.HEX_BITS:
-            result = format(b, "08b")
-        else:
-            result = format(b, "02x")
-        return result
-
-    @abstractmethod
-    def get_default_columns(self) -> int:
-        pass
+    def set_binary(self, args) -> bool:
+        """Binary option is incompatible with -ps, -i, or -r"""
+        binary: bool = args.get("binary", False)
+        if binary:
+            for other in ["postscript", "include", "reverse"]:
+                if other in args.keys() and args[other]:
+                    raise ValueError("-b option is incompatible with -ps, -i, or -r.")
+            self.hextype = HexType.HEX_BITS
+        return binary
 
     def set_columns(self, args) -> int:
         """Cols option has different defaults depending on whether -ps or -i have been specified"""
@@ -214,3 +155,67 @@ class Dumper(ABC):
         if cols > COLS:
             raise ValueError(f"Number of columns {cols} cannot be greater than {COLS}")
         return cols
+
+    def set_little_endian(self, args):
+        """Little endian option is incompatible with -ps, -i, or -r"""
+        little_endian: bool = args.get("little_endian", False)
+        if little_endian:
+            for other in ["postscript", "include", "reverse"]:
+                if other in args.keys():
+                    raise ValueError("-e option is incompatible with -ps, -i, or -r.")
+        return little_endian
+
+    def set_octets_per_group(self, args) -> int:
+        """Octets per group option has different defaults depending on other -e has been specified"""
+        octets_per_group = self.get_default_octets_per_group()
+        if args.get("little_endian", False):
+            octets_per_group = 4
+        elif self.binary:
+            octets_per_group = 1
+        elif args.get("postscript", False):
+            octets_per_group = 2
+        elif args.get("include", False):
+            octets_per_group = 0
+        else:
+            octets_per_group = 2
+        octets_per_group = self.get_default_octets_per_group()
+        attr_octets_per_group = args.get("octets_per_group", None)
+        if attr_octets_per_group is not None:
+            try:
+                if type(attr_octets_per_group) != int:
+                    attr_octets_per_group: int = int(attr_octets_per_group, 0)
+                octets_per_group = attr_octets_per_group
+            except ValueError as e:
+                errmsg = f"-o {attr_octets_per_group} is not numeric"
+                raise ValueError(errmsg)
+            if octets_per_group < 0:
+                raise ValueError(f"-o {attr_octets_per_group} is not a non-negative integer")
+        return octets_per_group
+
+    @abstractmethod
+    def mainline(self):
+        """Runs the dumper"""
+
+        self.file_offset = 0
+        self.so_far = 0
+        if self.seek:
+            seek = self.seek
+            try:
+                self.fpin.seek(seek)
+            except UnsupportedOperation as e:
+                for i in range(seek):
+                    self.fpin.read(1)
+            self.file_offset += seek
+
+    @abstractmethod
+    def mainline_reverse(self):
+        """Recreates original file from the hex output"""
+        pass
+
+    @abstractmethod
+    def get_default_columns(self) -> int:
+        pass
+
+    @abstractmethod
+    def get_default_octets_per_group(self) -> int:
+        pass
