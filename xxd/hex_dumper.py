@@ -266,7 +266,7 @@ class HexDumper(Dumper):
         varname = "".join(valid)
         return varname
 
-    def __init__(self, args: dict = {}):
+    def __init__(self, args=None):
         """Creates a new XXD object with specified options.
         Note that defaults are implemented here by the dictionary 'get(key, default)' approach.
         Incompatible options raise a ValueError.
@@ -274,6 +274,8 @@ class HexDumper(Dumper):
 
         super().__init__(args)
 
+        if args is None:
+            args = {}
         self.autoskip: bool = args.get("autoskip", False)
         self.autoskip_lines = None
         self.autoskip_state = None

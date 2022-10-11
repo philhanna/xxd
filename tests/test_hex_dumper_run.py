@@ -19,7 +19,7 @@ def runxxd(parms) -> subprocess.CompletedProcess:
                           capture_output=True)
 
 
-class TestRun(TestCase):
+class TestHexDumperRun(TestCase):
 
     def test_default(self):
         file1 = os.path.join(tmp, "file1")
