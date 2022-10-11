@@ -46,6 +46,7 @@ class Dumper(ABC):
         self.version: bool = args.get("version", False)
 
     def data_format(self, b):
+        """Converts a byte to a hex or binary string"""
         result = None
         if self.hextype == HexType.HEX_BITS:
             result = format(b, "08b")
@@ -119,6 +120,7 @@ class Dumper(ABC):
         return cols
 
     def set_hextype(self, args):
+        """Returns the element of HexType needed for this type of output"""
         hextype = HexType.HEX_NORMAL
         if "postscript" in args:
             hextype = HexType.HEX_POSTSCRIPT
@@ -131,6 +133,7 @@ class Dumper(ABC):
         return hextype
 
     def set_infile(self, args):
+        """Returns the input file name after checking to ensure the file exists"""
         infile: str = args.get("infile", None)
         if infile and not infile == '-':
             if not os.path.exists(infile):
@@ -139,6 +142,8 @@ class Dumper(ABC):
         return infile
 
     def set_length(self, args):
+        """Returns the length attribute as an integer.
+        Translated from a hex literal if necessary."""
         length = args.get("len", None)
         if length is None:
             return None
@@ -153,7 +158,8 @@ class Dumper(ABC):
         return length
 
     def set_little_endian(self, args):
-        """Little endian option is incompatible with -ps, -i, or -r"""
+        """Returns the value of the little endian option.
+        The little endian option is incompatible with -ps, -i, or -r"""
         little_endian: bool = args.get("little_endian", False)
         if little_endian:
             for other in ["postscript", "include", "reverse"]:
@@ -162,18 +168,14 @@ class Dumper(ABC):
         return little_endian
 
     def set_octets_per_group(self, args) -> int:
-        """Octets per group option has different defaults depending on other -e has been specified"""
-        octets_per_group = self.get_default_octets_per_group()
-        if args.get("little_endian", False):
-            octets_per_group = 4
-        elif self.binary:
-            octets_per_group = 1
-        elif args.get("postscript", False):
-            octets_per_group = 2
-        elif args.get("include", False):
-            octets_per_group = 0
-        else:
-            octets_per_group = 2
+        """Returns the octets per group according to either the
+        output type or any override.
+
+        The octets per group option has different defaults depending on
+        whether -e has been specified
+        """
+
+        # Set the default according to the output type
         octets_per_group = self.get_default_octets_per_group()
         attr_octets_per_group = args.get("octets_per_group", None)
         if attr_octets_per_group is not None:
@@ -188,7 +190,8 @@ class Dumper(ABC):
                 raise ValueError(f"-o {attr_octets_per_group} is not a non-negative integer")
         return octets_per_group
 
-    def set_offset(self, args):
+    def set_offset(self, args) -> int | None:
+        """Sets the offset attribute if specified in the arguments"""
         offset = args.get("offset", None)
         if offset is None:
             return None
@@ -202,7 +205,8 @@ class Dumper(ABC):
             raise ValueError(f"{offset} is not a non-negative integer")
         return offset
 
-    def set_seek(self, args):
+    def set_seek(self, args) -> int | None:
+        """Sets the seek attribute if specified in the arguments"""
         seek = args.get("seek", None)
         if seek is None:
             return None
@@ -242,17 +246,3 @@ class Dumper(ABC):
     @abstractmethod
     def get_default_octets_per_group(self) -> int:
         """Returns the default number of octets per group for this output type"""
-
-    def set_offset(self, args):
-        attr_offset = args.get("offset", 0)
-        if attr_offset is None:
-            return None
-        try:
-            if type(attr_offset) != int:
-                attr_offset: int = int(attr_offset, 0)
-        except ValueError as e:
-            errmsg = f"-o {attr_offset} is not numeric"
-            raise ValueError(errmsg)
-        if attr_offset < 0:
-            raise ValueError(f"{attr_offset=} is not a non-negative integer")
-        return attr_offset

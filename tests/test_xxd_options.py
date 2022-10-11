@@ -183,9 +183,7 @@ class TestXXDOptions(TestCase):
 
     def test_offset_default(self):
         xxd = HexDumper({})
-        expected = 0
-        actual = xxd.offset
-        self.assertEqual(expected, actual)
+        self.assertIsNone(xxd.offset)
 
     def test_offset_negative(self):
         with self.assertRaises(ValueError) as err:
