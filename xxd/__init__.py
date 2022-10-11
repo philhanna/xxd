@@ -42,6 +42,7 @@ from .hex_type import HexType
 from .dumper import Dumper
 from .hex_dumper import HexDumper
 from .c_dumper import CDumper
+from .ps_dumper import PostscriptDumper
 
 __all__ = [
     'CDumper',
@@ -51,5 +52,6 @@ __all__ = [
     'HexDumper',
     'HexType',
     'os_version',
+    'PostscriptDumper',
     'version_string',
 ]
