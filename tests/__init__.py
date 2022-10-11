@@ -1,5 +1,6 @@
 """Unit tests"""
 import os.path
+import subprocess
 import sys
 import tempfile
 from contextlib import contextmanager
@@ -44,6 +45,14 @@ def stdin_redirected(new_stdin):
         sys.stdin = save_stdin
 
 
+def runxxd(parms) -> subprocess.CompletedProcess:
+    return subprocess.run(parms,
+                          cwd=project_root_dir,
+                          check=True,
+                          text=True,
+                          capture_output=True)
+
+
 __all__ = [
     'tmp',
     'SaveDirectory',
@@ -52,4 +61,5 @@ __all__ = [
     'stdout_redirected',
     'stderr_redirected',
     'stdin_redirected',
+    'runxxd',
 ]

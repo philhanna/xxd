@@ -4,16 +4,8 @@ import subprocess
 from io import StringIO
 from unittest import TestCase
 
-from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDirectory, tmp
+from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDirectory, tmp, runxxd
 from xxd import HexDumper
-
-
-def runxxd(parms) -> subprocess.CompletedProcess:
-    return subprocess.run(parms,
-                          cwd=project_root_dir,
-                          check=True,
-                          text=True,
-                          capture_output=True)
 
 
 class TestHexDumperRun(TestCase):
