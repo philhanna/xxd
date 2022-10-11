@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from xxd import HexDumper, version_string, os_version, CDumper
+from xxd import HexDumper, version_string, os_version, CDumper, PostscriptDumper
 
 parser = argparse.ArgumentParser(description="xxd")
 parser.add_argument("-a", "--autoskip", action="store_true",
@@ -55,6 +55,8 @@ del args["skip"]
 try:
     if args["include"]:
         xxd = CDumper(args)
+    elif args["postscript"]:
+        xxd = PostscriptDumper(args)
     else:
         xxd = HexDumper(args)
     xxd.run()

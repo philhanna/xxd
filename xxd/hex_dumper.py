@@ -28,64 +28,55 @@ class HexDumper(Dumper):
             if type(data) == str:
                 data = bytes(data.encode("utf-8"))
 
-            # Handle postscript output
-            if self.postscript:
-                line = "".join([self.data_format(b) for b in data]) + "\n"
-                try:
-                    self.fpout.write(line)
-                except TypeError:
-                    self.fpout.write(line.encode('utf-8'))
+            # Handle normal output
+
+            data_list = [
+                data[i: i + self.octets_per_group: 1]
+                for i in range(0, len(data), self.octets_per_group)
+            ]
+
+            hex_list = [
+                "".join([self.data_format(b) for b in chunk_bytes])
+                for chunk_bytes in data_list
+            ]
+
+            text_list = [
+                "".join([self.text_format(b) for b in chunk_bytes])
+                for chunk_bytes in data_list
+            ]
+
+            sdata = " ".join(hex_list)
+            if self.cols % 2 == 1:
+                sdata += " "
+            if self.uppercase:
+                sdata = sdata.upper()
+            text = "".join(text_list)
+            offset_shown = self.file_offset
+            if hasattr(self, "offset"):
+                if self.offset is not None:
+                    if type(self.offset) != int:
+                        self.offset = int(self.offset, 0)
+                    add_offset = self.offset
+                    offset_shown += add_offset
+            if self.decimal:
+                offset_format_str = "08d"
             else:
+                offset_format_str = "08x"
 
-                # Handle normal output
+            group_width = {
+                HexType.HEX_BITS: 8,
+                HexType.HEX_NORMAL: 4
+            }.get(self.hextype, 4)
+            n_groups = int(self.cols / self.octets_per_group)
+            data_width = (1 + group_width) * n_groups  # Add 1 for the space separator
+            line = f"{offset_shown:{offset_format_str}}: {sdata:{data_width}s} {text}\n"
 
-                data_list = [
-                    data[i: i + self.octets_per_group: 1]
-                    for i in range(0, len(data), self.octets_per_group)
-                ]
+            if not self.autoskip:
+                self.xxd_line(line)
+            else:
+                self.xxd_line_autoskip(line, sdata)
 
-                hex_list = [
-                    "".join([self.data_format(b) for b in chunk_bytes])
-                    for chunk_bytes in data_list
-                ]
-
-                text_list = [
-                    "".join([self.text_format(b) for b in chunk_bytes])
-                    for chunk_bytes in data_list
-                ]
-
-                sdata = " ".join(hex_list)
-                if self.cols % 2 == 1:
-                    sdata += " "
-                if self.uppercase:
-                    sdata = sdata.upper()
-                text = "".join(text_list)
-                offset_shown = self.file_offset
-                if hasattr(self, "offset"):
-                    if self.offset is not None:
-                        if type(self.offset) != int:
-                            self.offset = int(self.offset, 0)
-                        add_offset = self.offset
-                        offset_shown += add_offset
-                if self.decimal:
-                    offset_format_str = "08d"
-                else:
-                    offset_format_str = "08x"
-
-                group_width = {
-                    HexType.HEX_BITS: 8,
-                    HexType.HEX_NORMAL: 4
-                }.get(self.hextype, 4)
-                n_groups = int(self.cols / self.octets_per_group)
-                data_width = (1 + group_width) * n_groups  # Add 1 for the space separator
-                line = f"{offset_shown:{offset_format_str}}: {sdata:{data_width}s} {text}\n"
-
-                if not self.autoskip:
-                    self.xxd_line(line)
-                else:
-                    self.xxd_line_autoskip(line, sdata)
-
-                # Done with normal output
+            # Done with normal output
 
             self.file_offset += chunk_size
             self.so_far += len(data)
@@ -163,14 +154,6 @@ class HexDumper(Dumper):
                 self.autoskip_lines.clear()
                 self.xxd_line(line)
                 self.autoskip_state = 0
-
-    def data_format(self, b):
-        result = None
-        if self.hextype == HexType.HEX_BITS:
-            result = format(b, "08b")
-        else:
-            result = format(b, "02x")
-        return result
 
     def text_format(self, c: int):
         if self.EBCDIC:

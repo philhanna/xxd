@@ -150,6 +150,14 @@ class Dumper(ABC):
                 raise RuntimeError(f"{self.pname}: {self.infile}: No such file or directory")
         self.outfile: str = args.get("outfile", None)
 
+    def data_format(self, b):
+        result = None
+        if self.hextype == HexType.HEX_BITS:
+            result = format(b, "08b")
+        else:
+            result = format(b, "02x")
+        return result
+
     @abstractmethod
     def mainline(self):
         """Runs the dumper"""

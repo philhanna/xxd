@@ -153,26 +153,6 @@ class TestVimTests(TestCase):
         os.remove(testdata)
         os.remove(expected_file)
 
-    def test5(self):
-        """Test 5: Print 120 bytes as continuous hexdump with 20 octets per line"""
-        infile = os.path.join(testdata, "xxd.1")
-        with StringIO() as fp, stdout_redirected(fp):
-            args = {
-                "postscript": True,
-                "len": 120,
-                "cols": 20,
-                "infile": infile
-            }
-            app = HexDumper(args)
-            app.run()
-            actual = fp.getvalue()
-
-        filename = os.path.join(testdata, "man_copy.ps.expected")
-        with open(filename, "rt") as fp:
-            expected = fp.read()
-
-        self.assertEqual(expected, actual)
-
     def test_6(self):
         """Test 6: Print the date from xxd.1"""
         infile = os.path.join(testdata, "xxd.1")
