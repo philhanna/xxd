@@ -45,15 +45,6 @@ class Dumper(ABC):
         self.uppercase: bool = args.get("uppercase", False)
         self.version: bool = args.get("version", False)
 
-    @staticmethod
-    def data_format(b, hextype: HexType) -> str:
-        """Converts a byte to a hex or binary string"""
-        if hextype == HexType.HEX_BITS:
-            result = format(b, "08b")
-        else:
-            result = format(b, "02x")
-        return result
-
     def run(self):
         """Calls mainline with specified input and output files"""
 
@@ -218,6 +209,15 @@ class Dumper(ABC):
         if seek < 0:
             raise ValueError(f"{seek} is not a non-negative integer")
         return seek
+
+    @staticmethod
+    def data_format(b: int, hextype: HexType) -> str:
+        """Converts a byte to a hex or binary string"""
+        if hextype == HexType.HEX_BITS:
+            result = format(b, "08b")
+        else:
+            result = format(b, "02x")
+        return result
 
     @abstractmethod
     def mainline(self):
