@@ -81,10 +81,13 @@ class Dumper(ABC):
                 if self.fpout != sys.stdout:
                     self.fpout.close()
 
-    def set_binary(self, args) -> bool:
+    @staticmethod
+    def set_binary(args) -> bool:
         """Binary option is incompatible with -ps, -i, or -r"""
-        binary: bool = args.get("binary", False)
-        if binary:
+        binary: bool = args.get("binary", None)
+        if binary is not None:
+            if type(binary) != bool:
+                raise ValueError(f"-b option '{binary}' is not True or False")
             for other in ["postscript", "include", "reverse"]:
                 if other in args.keys() and args[other]:
                     raise ValueError("-b option is incompatible with -ps, -i, or -r.")
