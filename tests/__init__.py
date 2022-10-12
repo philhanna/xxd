@@ -46,11 +46,12 @@ def stdin_redirected(new_stdin):
 
 
 def runxxd(parms) -> subprocess.CompletedProcess:
-    return subprocess.run(parms,
-                          cwd=project_root_dir,
-                          check=True,
-                          text=True,
-                          capture_output=True)
+    cp = subprocess.run(parms,
+                        cwd=project_root_dir,
+                        check=True,
+                        text=True,
+                        capture_output=True)
+    return cp
 
 
 __all__ = [

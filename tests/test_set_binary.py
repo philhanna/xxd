@@ -14,7 +14,7 @@ class TestSetBinary(TestCase):
 
     def test_default(self):
         args = {}
-        expected = None
+        expected = False
         actual = Dumper.set_binary(args)
         self.assertEqual(expected, actual)
 

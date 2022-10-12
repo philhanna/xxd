@@ -52,6 +52,7 @@ for name in ["skip", "seek"]:
     if args[name] is not None:
         args["seek"] = args[name]
 del args["skip"]
+
 try:
     if args["include"]:
         xxd = CDumper(args)

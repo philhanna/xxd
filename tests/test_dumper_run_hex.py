@@ -7,56 +7,44 @@ from unittest import TestCase
 from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDirectory, tmp, runxxd
 from xxd import HexDumper
 
+CPGM = "xxd"
+PPGM = "./pxxd"
+
 
 class TestDumperRunHex(TestCase):
 
     def test_default(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "testdata/short", file1]
+        parms = [CPGM, "testdata/short", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "infile": os.path.join(project_root_dir, "testdata/short"),
-            "outfile": file2
-        }
-        app = HexDumper(args)
-        app.run()
+        parms = [PPGM, "testdata/short", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
         os.remove(file2)
 
     def test_l_100(self):
-        parms = ["xxd", "-l", "100", "testdata/cut"]
+        parms = [CPGM, "-l", "100", "testdata/cut"]
         cp = runxxd(parms)
         expected = cp.stdout
 
-        args = {
-            "len": 100,
-            "infile": os.path.join(project_root_dir, "testdata/cut")
-        }
-        app = HexDumper(args)
-        with StringIO() as out, stdout_redirected(out):
-            app.run()
-            actual = out.getvalue()
+        parms = [PPGM, "-l", "100", "testdata/cut"]
+        cp = runxxd(parms)
+        actual = cp.stdout
 
         self.assertEqual(expected, actual)
 
     def test_o_x20(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-l", "100", "-o", "0x20", "testdata/cut", file1]
+        parms = [CPGM, "-l", "100", "-o", "0x20", "testdata/cut", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "len": 100,
-            "offset": "0x20",
-            "infile": os.path.join(project_root_dir, "testdata/cut"),
-            "outfile": file2
-        }
-        app = HexDumper(args)
-        app.run()
+        parms = [PPGM, "-l", "100", "-o", "0x20", "testdata/cut", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -64,17 +52,12 @@ class TestDumperRunHex(TestCase):
 
     def test_binary(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-b", "testdata/short", file1]
+        parms = [CPGM, "-b", "testdata/short", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "binary": True,
-            "infile": os.path.join(project_root_dir, "testdata/short"),
-            "outfile": file2
-        }
-        app = HexDumper(args)
-        app.run()
+        parms = [PPGM, "-b", "testdata/short", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -82,16 +65,12 @@ class TestDumperRunHex(TestCase):
 
     def test_columns_default(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "testdata/short", file1]
+        parms = [CPGM, "testdata/short", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "infile": os.path.join(project_root_dir, "testdata/short"),
-            "outfile": file2
-        }
-        app = HexDumper(args)
-        app.run()
+        parms = [PPGM, "testdata/short", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -99,20 +78,12 @@ class TestDumperRunHex(TestCase):
 
     def test_columns_10(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-u", "-d", "-c", "10", "-o", "0x100", "testdata/short", file1]
+        parms = [CPGM, "-u", "-d", "-c", "10", "-o", "0x100", "testdata/short", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "cols": 10,
-            "decimal": True,
-            "uppercase": True,
-            "offset": "0x100",
-            "infile": os.path.join(project_root_dir, "testdata/short"),
-            "outfile": file2
-        }
-        app = HexDumper(args)
-        app.run()
+        parms = [CPGM, "-u", "-d", "-c", "10", "-o", "0x100", "testdata/short", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -120,17 +91,12 @@ class TestDumperRunHex(TestCase):
 
     def test_columns_20(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-c", "20", "testdata/short", file1]
+        parms = [CPGM, "-c", "20", "testdata/short", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "cols": 20,
-            "infile": os.path.join(project_root_dir, "testdata/short"),
-            "outfile": file2
-        }
-        app = HexDumper(args)
-        app.run()
+        parms = [PPGM, "-c", "20", "testdata/short", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -148,23 +114,12 @@ class TestDumperRunHex(TestCase):
 
     def test_ebcdic(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-E", "testdata/short", file1]
+        parms = [CPGM, "-E", "testdata/short", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "EBCDIC": True,
-            "infile": "testdata/short",
-            "outfile": file2
-        }
-
-        # Need to chdir so that the input file is found.
-        # I can't specify a full path because that's what is used
-        # to form the varname of the include file
-        with SaveDirectory():
-            os.chdir(project_root_dir)
-            app = HexDumper(args)
-            app.run()
+        parms = [PPGM, "-E", "testdata/short", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -172,23 +127,12 @@ class TestDumperRunHex(TestCase):
 
     def test_autoskip_allzero(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-a", "testdata/allzero", file1]
+        parms = [CPGM, "-a", "testdata/allzero", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "autoskip": True,
-            "infile": "testdata/allzero",
-            "outfile": file2
-        }
-
-        # Need to chdir so that the input file is found.
-        # I can't specify a full path because that's what is used
-        # to form the varname of the include file
-        with SaveDirectory():
-            os.chdir(project_root_dir)
-            app = HexDumper(args)
-            app.run()
+        parms = [PPGM, "-a", "testdata/allzero", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -196,20 +140,12 @@ class TestDumperRunHex(TestCase):
 
     def test_autoskip_mixed(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-a", "testdata/mixedzero", file1]
+        parms = [CPGM, "-a", "testdata/mixedzero", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "autoskip": True,
-            "infile": "testdata/mixedzero",
-            "outfile": file2
-        }
-
-        with SaveDirectory():
-            os.chdir(project_root_dir)
-            app = HexDumper(args)
-            app.run()
+        parms = [PPGM, "-a", "testdata/mixedzero", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -217,20 +153,12 @@ class TestDumperRunHex(TestCase):
 
     def test_seek(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-s", "0x20", "testdata/short", file1]
+        parms = [CPGM, "-s", "0x20", "testdata/short", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "seek": 0x20,
-            "infile": "testdata/short",
-            "outfile": file2
-        }
-
-        with SaveDirectory():
-            os.chdir(project_root_dir)
-            app = HexDumper(args)
-            app.run()
+        parms = [PPGM, "-s", "0x20", "testdata/short", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -238,19 +166,12 @@ class TestDumperRunHex(TestCase):
 
     def test_seek_past_end(self):
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-s", "0x100", "testdata/short", file1]
+        parms = [CPGM, "-s", "0x100", "testdata/short", file1]
         runxxd(parms)
 
         file2 = os.path.join(tmp, "file2")
-        args = {
-            "seek": "0x100",
-            "infile": "testdata/short",
-            "outfile": file2
-        }
-        with SaveDirectory():
-            os.chdir(project_root_dir)
-            app = HexDumper(args)
-            app.run()
+        parms = [PPGM, "-s", "0x100", "testdata/short", file2]
+        runxxd(parms)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
@@ -259,7 +180,7 @@ class TestDumperRunHex(TestCase):
     def test_seek_with_stdin(self):
         """ Unit test with --seek and stdin"""
         file1 = os.path.join(tmp, "file1")
-        parms = ["xxd", "-s", "0x01", "-", file1]
+        parms = [CPGM, "-s", "0x01", "-", file1]
         subprocess.run(parms,
                        cwd=project_root_dir,
                        check=True,
@@ -267,24 +188,21 @@ class TestDumperRunHex(TestCase):
                        input="abcdefg",
                        capture_output=True)
 
-        with (StringIO("abcdefg") as fpin,
-              stdin_redirected(fpin),
-              SaveDirectory()):
-            file2 = os.path.join(tmp, "file2")
-            args = {
-                "seek": "0x01",
-                "outfile": file2
-            }
-            os.chdir(project_root_dir)
-            app = HexDumper(args)
-            app.run()
+        file2 = os.path.join(tmp, "file2")
+        parms = [PPGM, "-s", "0x01", "-", file2]
+        subprocess.run(parms,
+                       cwd=project_root_dir,
+                       check=True,
+                       text=True,
+                       input="abcdefg",
+                       capture_output=True)
 
         self.assertTrue(filecmp.cmp(file1, file2))
         os.remove(file1)
         os.remove(file2)
 
     def test_dont_show_traceback(self):
-        parms = ["./pxxd", "bogus"]
+        parms = [PPGM, "bogus"]
         cp = runxxd(parms)
         errmsg = cp.stdout
         self.assertIn("No such file or directory", errmsg)

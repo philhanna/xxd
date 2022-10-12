@@ -84,8 +84,8 @@ class Dumper(ABC):
     @staticmethod
     def set_binary(args) -> bool:
         """Binary option is incompatible with -ps, -i, or -r"""
-        binary: bool = args.get("binary", None)
-        if binary is not None:
+        binary: bool = args.get("binary", False)
+        if binary:
             if type(binary) != bool:
                 raise ValueError(f"-b option '{binary}' is not True or False")
             for other in ["postscript", "include", "reverse"]:
@@ -112,16 +112,17 @@ class Dumper(ABC):
             raise ValueError(f"Number of columns {cols} cannot be greater than {COLS}")
         return cols
 
-    def set_hextype(self, args):
+    @staticmethod
+    def set_hextype(args):
         """Returns the element of HexType needed for this type of output"""
         hextype = HexType.HEX_NORMAL
-        if "postscript" in args:
+        if args.get("postscript", False):
             hextype = HexType.HEX_POSTSCRIPT
-        elif "include" in args:
+        elif args.get("include", False):
             hextype = HexType.HEX_CINCLUDE
-        elif "binary" in args:
+        elif args.get("binary", False):
             hextype = HexType.HEX_BITS
-        elif "litte_endian" in args:
+        elif args.get("little_endian", False):
             hextype = HexType.HEX_LITTLEENDIAN
         return hextype
 
