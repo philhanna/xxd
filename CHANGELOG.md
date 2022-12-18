@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 
 ## [Unreleased]
 - Added this changelog
+- Issue #37: Converted all unit tests to pytest
 
 ## [1.1.0] - 2022-10-11
 
