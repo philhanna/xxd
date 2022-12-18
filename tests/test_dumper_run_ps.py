@@ -3,7 +3,7 @@ from io import StringIO
 from os import chdir
 from pathlib import Path
 
-from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDirectory, tmp, runxxd, testdata
+from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDirectory, runxxd, testdata
 from xxd import PostscriptDumper
 
 CPGM = "xxd"

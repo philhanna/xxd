@@ -2,7 +2,7 @@ import filecmp
 from io import StringIO
 from pathlib import Path
 
-from tests import tmp, runxxd, SaveDirectory, project_root_dir, stdout_redirected
+from tests import tmp, runxxd, stdout_redirected
 from xxd import CDumper
 
 CPGM = "xxd"

@@ -1,6 +1,7 @@
 import filecmp
-from pathlib import Path
 from os import chdir
+from pathlib import Path
+
 from tests import project_root_dir, SaveDirectory, tmp, runxxd
 from xxd import HexDumper
 

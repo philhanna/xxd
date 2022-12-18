@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from tests import project_root_dir, stdout_redirected, stdin_redirected, SaveDirectory, tmp, runxxd
+from tests import project_root_dir, runxxd
 from xxd import HexDumper
 
 CPGM = "xxd"

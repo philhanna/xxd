@@ -1,4 +1,5 @@
 import pytest
+
 from xxd import HexDumper, CDumper, PostscriptDumper
 
 
