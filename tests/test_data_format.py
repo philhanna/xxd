@@ -1,36 +1,14 @@
-from unittest import TestCase
+import pytest
 
 from xxd import Dumper, HexType
 
 
-class TestDataFormat(TestCase):
-
-    def test_data_format_binary(self):
-        b = 0x23
-        expected = "00100011"
-        actual = Dumper.data_format(b, HexType.HEX_BITS)
-        self.assertEqual(expected, actual)
-
-    def test_data_format_little_endian(self):
-        b = 0x23
-        expected = "23"
-        actual = Dumper.data_format(b, HexType.HEX_LITTLEENDIAN)
-        self.assertEqual(expected, actual)
-
-    def test_data_format_c_include(self):
-        b = 0x23
-        expected = "23"
-        actual = Dumper.data_format(b, HexType.HEX_CINCLUDE)
-        self.assertEqual(expected, actual)
-
-    def test_data_format_postscript(self):
-        b = 0x23
-        expected = "23"
-        actual = Dumper.data_format(b, HexType.HEX_POSTSCRIPT)
-        self.assertEqual(expected, actual)
-
-    def test_data_format_normal(self):
-        b = 0x23
-        expected = "23"
-        actual = Dumper.data_format(b, HexType.HEX_NORMAL)
-        self.assertEqual(expected, actual)
+@pytest.mark.parametrize("b,hextype,expected", [
+    (0x23, HexType.HEX_BITS, "00100011"),
+    (0x23, HexType.HEX_LITTLEENDIAN, "23"),
+    (0x23, HexType.HEX_CINCLUDE, "23"),
+    (0x23, HexType.HEX_POSTSCRIPT, "23"),
+    (0x23, HexType.HEX_NORMAL, "23"),
+])
+def test_data_format(b, hextype, expected):
+    assert Dumper.data_format(b, hextype) == expected
